@@ -1,0 +1,25 @@
+<div class="toolbox-container">
+    <header class="toolbox-header">
+        <h3>Composants</h3>
+    </header>
+
+    <div class="search-box">
+        <input type="text" placeholder="Rechercher un tag...">
+    </div>
+
+    <div class="categories-list">
+        @for (cat of categories; track cat.name) {
+            <div class="category">
+                <span class="category-title"> {{cat.name}} </span>
+                <div class="items-grid">
+                    @for ( item of cat.items; track item.label) {
+                        <div class="toolbox-item" draggable="true">
+                            <lucide-angular [name]="item.icon" class="item-icon"></lucide-angular>
+                        <span class="item-label"> {{item.label}} </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
