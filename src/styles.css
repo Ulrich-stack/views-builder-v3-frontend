@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+:root{
+    --sidebar-bg: #1e1e1e;
+    --sidebar-border: #333333;
+    --item-bg: #2d2d2d;
+    --item-hover: #3e3e3e;
+    --text-main: #e0e0e0;
+    --text-second: #999999;
+    --accent: #3b82f6;
+}
