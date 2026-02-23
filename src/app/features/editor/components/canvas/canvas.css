@@ -1,35 +1,65 @@
-:host{
-    width: 100%;
+.viewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #121212;
+  cursor: grab;
 }
 
-.canvas-area {
-  width: 100%;
-  min-height: 100%;
-  background-color: #0f0f0f;
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
-  overflow-y: auto;
+.viewport:active {
+  cursor: grabbing;
 }
 
-.page {
-  width: 100%;
-  min-height: 100%;
-  background-color: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  padding: 20px;
-  border-radius: 4px;
+.infinite-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10000px; /* Immense surface */
+  height: 10000px;
+  background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform-origin: 0 0; 
+}
+
+.page-container {
+  position: absolute;
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
-.empty-state {
-  height: 200px;
-  border: 2px dashed #e0e0e0;
-  border-radius: 8px;
+.page-label {
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.page-paper {
+  width: 800px; /* Largeur fixe pour une page web standard */
+  min-height: 1000px;
+  background: white;
+  border-radius: 2px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  padding: 20px;
+}
+
+.canvas-ui {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #aaa;
-  font-style: italic;
+  gap: 15px;
+  pointer-events: none;
+}
+
+.canvas-controls{
+    color: white;
 }

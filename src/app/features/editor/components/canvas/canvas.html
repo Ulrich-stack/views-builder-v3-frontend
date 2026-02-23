@@ -1,13 +1,29 @@
-<div class="canvas-area" (dragover)="onDragOver($event)" (drop)="onDrop($event)" >
-    <div class="page">
-        @for (w of editor.project(); track w.id) {
-      <app-widget-renderer [widget]="w"></app-widget-renderer>
-    }
+<div class="viewport" (mousedown)="startDragging($event)">
+  
+  <div class="infinite-surface" [style.transform]="surfaceTransform()">
+    
+    @for (page of editor.pages(); track page.id) {
+      <div class="page-container" [style.left.px]="page.x" [style.top.px]="page.y">
+        <div class="page-label">{{ page.name }}</div>
+        
+        <div class="page-paper" 
+             (dragover)="onDragOver($event)" 
+             (drop)="onDrop($event, page.id)">
+          
+          @for (w of page.widgets; track w.id) {
+            <app-widget-renderer 
+              [widget]="w" 
+              [pageId]="page.id">
+            </app-widget-renderer>
+          }
 
-    @if (editor.project().length === 0) {
-      <div class="empty-state">
-        <p>Glissez-déposez un composant ici</p>
+        </div>
       </div>
     }
-    </div>
+
+  </div>
+
+  <div class="canvas-controls">
+    <span>Zoom: {{ (zoom() * 100).toFixed(0) }}%</span>
+  </div>
 </div>

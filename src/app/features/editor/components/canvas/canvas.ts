@@ -60,7 +60,7 @@ export class Canvas {
       event.dataTransfer.effectAllowed = "move";
   }
 
-  onDrop(event: DragEvent) {
+  onDrop(event: DragEvent, pageId: string) {
     event.preventDefault();
     const data = event.dataTransfer?.getData("widget-item");
 
@@ -70,12 +70,12 @@ export class Canvas {
       // Si l'objet a un ID, c'est un déplacement vers la racine
       if (draggedData.id) {
         // On utilise moveWidget
-        this.editor.moveWidget(draggedData.id, null); // null = racine
+        this.editor.moveWidget(draggedData.id, null, pageId); // null = racine
       }
       // Sinon, c'est un nouvel élément de la Toolbox
       else {
         const newWidget = this.editor.createWidgetFromToolboxItem(draggedData);
-        this.editor.addWidget(newWidget);
+        this.editor.addWidget(newWidget, null, pageId);
       }
     }
   }

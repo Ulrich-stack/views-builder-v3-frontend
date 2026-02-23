@@ -1,37 +1,34 @@
-
-.editor-layout{
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    background-color: #f3f4f6;
+.editor-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; 
+  background-color: #000;
 }
 
-.sidebar{
-    width: 300px;
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-    color: var(--text-main);
+.sidebar {
+  width: 280px;
+  height: 100%;
+  background-color: #1a1a1a;
+  border-right: 1px solid #333;
+  z-index: 10; 
+  color: var(--text-main);
 }
 
-.sidebar.properties{
-    border-right: none;
-    border-left: 1px solid #e5e7eb;
+.sidebar.properties {
+  border-right: none;
+  border-left: 1px solid #333;
 }
 
-.canvas-wrapper{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.canvas-area {
+  flex-grow: 1; 
+  position: relative;
+  height: 100%;
+  overflow: hidden;
 }
 
-.viewport{
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    justify-content: center;
+app-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
