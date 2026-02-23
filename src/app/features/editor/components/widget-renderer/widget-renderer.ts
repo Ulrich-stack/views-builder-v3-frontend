@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class WidgetRenderer {
   widget = input.required<Widget>();
+  pageId = input.required<string>();
 
   editor = inject(EditorService);
 
@@ -42,14 +43,16 @@ export class WidgetRenderer {
       const data = event.dataTransfer?.getData("widget-item");
       if (data) {
         const draggedData = JSON.parse(data);
+        //Pour ne pas se lâcher sur soi-même
+        if (draggedData.id === this.widget().id) return;
 
         if (draggedData.id) {
           // Déplacement
-          this.editor.moveWidget(draggedData.id, this.widget().id);
+          this.editor.moveWidget(draggedData.id, this.widget().id, this.pageId());
         } else {
           // Création
           const newWidget = this.editor.createWidgetFromToolboxItem(draggedData);
-          this.editor.addWidget(newWidget, this.widget().id);
+          this.editor.addWidget(newWidget, this.widget().id, this.pageId());
         }
       }
     }

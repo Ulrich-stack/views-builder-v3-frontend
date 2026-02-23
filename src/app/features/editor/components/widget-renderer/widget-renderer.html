@@ -15,7 +15,10 @@
     @case ('container') {
       <div class="container-inner">
         @for (child of widget().children; track child.id) {
-          <app-widget-renderer [widget]="child"></app-widget-renderer>
+          <app-widget-renderer 
+            [widget]="child" 
+            [pageId]="pageId()">
+          </app-widget-renderer>
         }
       </div>
     }
