@@ -1,0 +1,39 @@
+<div 
+  [id]="widget().id"
+  [ngStyle]="widget().styles"
+  [class.selected]="editor.selectedWidgetId() === widget().id"
+  [class.is-container]="widget().type === 'container'"
+  (dragstart)="onDragStart($event)"
+  (dragover)="onDragOver($event)"
+  (drop)="onDrop($event)"
+  (click)="selectWidget($event)"
+  class="widget-wrapper"
+  draggable="true"
+>
+  @switch (widget().type) {
+    
+    @case ('container') {
+      <div class="container-inner">
+        @for (child of widget().children; track child.id) {
+          <app-widget-renderer [widget]="child"></app-widget-renderer>
+        }
+      </div>
+    }
+
+    @case ('text') {
+      @switch (widget().element) {
+        @case ('h1') { <h1>{{ widget().content }}</h1> }
+        @case ('h2') { <h2>{{ widget().content }}</h2> }
+        @default { <p>{{ widget().content }}</p> }
+      }
+    }
+
+    @case ('action') {
+      <button class="btn-render">{{ widget().content }}</button>
+    }
+
+    @case ('media') {
+      <img [src]="widget().config['src'] || 'https://via.placeholder.com/150'" style="max-width: 100%">
+    }
+  }
+</div>

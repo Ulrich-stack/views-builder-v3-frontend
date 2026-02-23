@@ -16,7 +16,7 @@ export class EditorService {
 
   selectedWidget = computed(() => {
     const id = this.selectedWidgetId();
-    if(!id)
+    if (!id)
       return null;
     return this.findWidgetRecursive(this.project(), id);
   })
@@ -49,8 +49,6 @@ export class EditorService {
 
   private getDefaultStyles(item: ToolboxItem): Record<string, string> {
     const baseStyles = {
-      'padding': '10px',
-      'margin': '5px',
       'border': '1px solid transparent'
     }
 
@@ -94,8 +92,28 @@ export class EditorService {
 
   }
 
+  moveWidget(widgetId: string, targetParentId: string | null = null) {
+    this.project.update(currentProject => {
+      const widgetToMove = this.findWidgetRecursive(currentProject, widgetId);
+      if (!widgetToMove) return currentProject;
+
+      const widgetCopy = { ...widgetToMove };
+      // On nettoie l'ancien emplacement
+      const cleanedProject = this.removeRecursive(currentProject, widgetId);
+
+      // Si targetParentId est null, on pousse à la racine du projet
+      if (!targetParentId) {
+        return [...cleanedProject, widgetCopy];
+      } else {
+        // Sinon on insère dans le container cible
+        this.insertInParentRecursive(cleanedProject, targetParentId, widgetCopy);
+        return cleanedProject;
+      }
+    });
+  }
+
   //Supprime son widget par son id
-  remoteWidget(id: string) {
+  removeWidget(id: string) {
     this.project.update(currentProject => {
       const updated = this.removeRecursive(currentProject, id);
       if (this.selectedWidgetId() === id)

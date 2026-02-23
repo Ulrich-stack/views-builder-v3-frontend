@@ -6,7 +6,7 @@ import { Properties } from "./features/editor/components/properties/properties";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Toolbox, Canvas, Properties],
+  imports: [Toolbox, Canvas, Properties],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

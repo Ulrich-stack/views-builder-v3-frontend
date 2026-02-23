@@ -1,0 +1,66 @@
+.widget-wrapper {
+  position: relative;
+  transition: all 0.2s ease;
+  min-height: 10px;
+}
+
+.widget-wrapper:hover {
+  outline: 1px dashed #3b82f6;
+  outline-offset: 2px;
+}
+
+.selected {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px;
+  z-index: 10;
+}
+
+.container-inner:empty::after {
+  content: 'Container vide';
+  display: block;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed #ddd;
+  color: #ccc;
+  text-align: center;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.btn-render {
+  padding: inherit;
+  background-color: inherit;
+  color: inherit;
+  border: inherit;
+  border-radius: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+h1, h2, p {
+  margin: 0;
+}
+
+.is-container {
+  min-height: 50px;
+  border: 1px dashed transparent;
+  transition: border 0.2s;
+}
+
+.is-container:hover {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.container-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+  width: 100%;
+}
+
+.widget-wrapper:active {
+  opacity: 0.5;
+  border: 2px dashed var(--accent);
+}

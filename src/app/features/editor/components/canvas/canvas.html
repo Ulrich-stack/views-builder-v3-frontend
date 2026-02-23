@@ -1,1 +1,13 @@
-<p>canvas works!</p>
+<div class="canvas-area" (dragover)="onDragOver($event)" (drop)="onDrop($event)" >
+    <div class="page">
+        @for (w of editor.project(); track w.id) {
+      <app-widget-renderer [widget]="w"></app-widget-renderer>
+    }
+
+    @if (editor.project().length === 0) {
+      <div class="empty-state">
+        <p>Glissez-déposez un composant ici</p>
+      </div>
+    }
+    </div>
+</div>

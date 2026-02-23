@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { WIDGET_CATALOG } from '../../../../../core/data/toolbox.data';
+import { ToolboxItem, WIDGET_CATALOG } from '../../../../../core/data/toolbox.data';
 import { CommonModule } from '@angular/common';
 import { FileIcon, LucideAngularModule } from 'lucide-angular';
 
 interface ToolboxCategory {
   name: string;
-  items: { type: string; label: string; icon: string; element: string }[]
+  items: ToolboxItem[]
 };
 
 @Component({
@@ -17,4 +17,12 @@ interface ToolboxCategory {
 export class Toolbox {
   readonly FileIcon = FileIcon;
   categories: ToolboxCategory[] = WIDGET_CATALOG;
+
+  onDragStart(event: DragEvent, item: ToolboxItem){
+    event.dataTransfer?.setData('widget-item', JSON.stringify(item));
+
+    if(event.dataTransfer){
+      event.dataTransfer.effectAllowed = 'move'
+    }    
+  }
 }
