@@ -242,3 +242,20 @@ input[type='color'] {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+
+.resizer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--primary) 50%);
+  border-radius: 0 0 2px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.page-paper:hover .resizer {
+  opacity: 1;
+}

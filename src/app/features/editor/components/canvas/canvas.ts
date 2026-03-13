@@ -4,6 +4,7 @@ import { WidgetRenderer } from '../widget-renderer/widget-renderer';
 import { ToolboxItem } from '../../../../../core/data/toolbox.data';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Page } from '../../../../../core/models/page.model';
 
 @Component({
   selector: 'app-canvas',
@@ -50,19 +51,47 @@ export class Canvas {
     this.offsetY.set(mouseY - worldY * newZoom);
   }
 
-startDragging(event: MouseEvent) {
-  // On ne déclenche le "Pan" (déplacement canvas) QUE si :
-  // - On utilise le clic milieu (molette)
-  // - OU on utilise le clic gauche mais avec la touche SHIFT
-  const isPanCommand = event.button === 1 || (event.button === 0 && event.shiftKey);
 
-  if (isPanCommand) {
-    this.isDragging = true;
-    document.body.style.cursor = 'grabbing';
+  // Dans ta classe Canvas
+  startResizing(event: MouseEvent, page: Page) {
     event.preventDefault();
     event.stopPropagation();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startWidth = page.width || 800;
+    const startHeight = page.height || 1000;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      // On divise par le zoom pour que le redimensionnement soit fidèle au curseur
+      const deltaX = (moveEvent.clientX - startX) / this.zoom();
+      const deltaY = (moveEvent.clientY - startY) / this.zoom();
+
+      page.width = Math.max(200, startWidth + deltaX);
+      page.height = Math.max(200, startHeight + deltaY);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   }
-}
+  startDragging(event: MouseEvent) {
+    // On ne déclenche le "Pan" (déplacement canvas) QUE si :
+    // - On utilise le clic milieu (molette)
+    // - OU on utilise le clic gauche mais avec la touche SHIFT
+    const isPanCommand = event.button === 1 || (event.button === 0 && event.shiftKey);
+
+    if (isPanCommand) {
+      this.isDragging = true;
+      document.body.style.cursor = 'grabbing';
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
 
   @HostListener("window:mousemove", ["$event"])
   onMouseMove(event: MouseEvent) {

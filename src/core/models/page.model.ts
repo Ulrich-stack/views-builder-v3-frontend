@@ -5,6 +5,8 @@ export interface Page {
   name: string;
   x: number;
   y: number;
+  width?: number; 
+  height?: number;
   widgets: Widget[];
   isDesignSystem?: boolean
 }
