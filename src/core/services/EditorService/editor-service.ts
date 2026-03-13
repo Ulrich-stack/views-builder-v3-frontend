@@ -2,31 +2,96 @@ import { computed, Injectable, signal } from '@angular/core';
 import { Widget, WidgetType } from '../../models/widget.model';
 import { ToolboxItem } from '../../data/toolbox.data';
 import { v4 as uuidv4 } from 'uuid';
+import { DesignSystem } from '../../models/design-sytem.model';
+import { Page } from '../../models/page.model';
 
-export interface Page {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  widgets: Widget[]
-}
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class EditorService {
-
   pages = signal<Page[]>([
-    { id: 'page-1', name: 'Home Page', x: 4100, y: 4100, widgets: [] }
   ])
+
+  designSystem = signal<DesignSystem>({
+colors: {
+    primary: '#6366f1',  
+    secondary: '#94a3b8',
+    bg: '#0f172a',       
+    surface: '#1e293b',  
+    text: '#f8fafc',     
+    muted: '#64748b'     
+  },
+    typography: {
+      family: "'Inter', sans-serif",
+      sizeBase: 16
+    },
+    spacing: {
+      radius: 4,
+      padding: 16
+    }
+  });
+
+
+  constructor() {
+    this.pages.set([
+      {
+        id: 'ds-page',
+        name: '🎨 Global Design System',
+        x: 3500,
+        y: 4000,
+        widgets: [],
+        isDesignSystem: true
+      },
+      { id: 'page-1', name: 'Home Page', x: 4100, y: 4100, widgets: [] }
+    ]);
+  }
+
+  // Génération automatique des variables CSS
+  globalVariables = computed(() => {
+    const ds = this.designSystem();
+    return {
+      '--primary': ds.colors.primary,
+      '--secondary': ds.colors.secondary,
+      '--bg-page': ds.colors.bg,
+      '--surface': ds.colors.surface,
+      '--text': ds.colors.text,
+      '--text-muted': ds.colors.muted,
+      '--font-family': ds.typography.family,
+      '--font-size-base': ds.typography.sizeBase + 'px',
+      '--radius-main': ds.spacing.radius + 'px',
+      '--spacing-base': ds.spacing.padding + 'px',
+      // Calcul automatique d'échelles (H1, H2, etc.)
+      '--font-size-lg': (ds.typography.sizeBase * 1.5) + 'px',
+      '--font-size-xl': (ds.typography.sizeBase * 2.5) + 'px',
+    };
+  });
+
 
   selectedWidgetId = signal<string | null>(null);
   selectedPageId = signal<string | null>('page-1');
 
+  updateTheme(path: string, value: any) {
+    this.designSystem.update(ds => {
+      const newDs = JSON.parse(JSON.stringify(ds));
+
+      const keys = path.split('.');
+      let current: any = newDs;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = value;
+      return newDs;
+    });
+  }
+
   selectedWidget = computed(() => {
     const id = this.selectedWidgetId();
     if (!id) return null;
-    
+
     for (const page of this.pages()) {
       const found = this.findWidgetRecursive(page.widgets, id);
       if (found) return found;
@@ -52,7 +117,7 @@ export class EditorService {
 
   addWidget(widget: Widget, parentId: string | null = null, pageId: string | null = null) {
     const targetPageId = pageId || this.selectedPageId();
-    
+
     this.pages.update(currentPages => {
       return currentPages.map(page => {
         if (page.id !== targetPageId) return page;
@@ -61,7 +126,7 @@ export class EditorService {
         if (!parentId) {
           return { ...page, widgets: [...page.widgets, widget] };
         }
-        
+
         // Sinon, on cherche récursivement dans les containers de la page
         const newWidgets = [...page.widgets];
         this.insertInParentRecursive(newWidgets, parentId, widget);
@@ -74,7 +139,7 @@ export class EditorService {
   moveWidget(widgetId: string, targetParentId: string | null, targetPageId: string) {
     this.pages.update(currentPages => {
       let draggedWidget: Widget | null = null;
-      
+
       // On nettoie toutes les pages pour être sûr de supprimer l'ancienne instance
       const cleanedPages = currentPages.map(page => {
         const found = this.findWidgetRecursive(page.widgets, widgetId);
@@ -133,20 +198,46 @@ export class EditorService {
       }));
   }
 
-  private getDefaultContent(item: ToolboxItem): string {
-    switch (item.type) {
-      case 'text': return 'Double-cliquez pour éditer';
-      case 'action': return 'Bouton';
-      default: return '';
-    }
+private getDefaultContent(item: ToolboxItem): string {
+  switch (item.type) {
+    case 'text': return 'Texte';
+    case 'action': return 'Bouton';
+    default: return '';
+  }
+}
+
+private getDefaultStyles(item: ToolboxItem): Record<string, string> {
+  // On utilise les variables CSS définies dans globalVariables
+  const base = { 
+    'padding': 'var(--spacing-base)', 
+    'margin': '5px',
+    'font-family': 'var(--font-family)',
+    'color': 'var(--text)'
+  };
+
+  if (item.type === 'container') {
+    return { 
+      ...base, 
+      'min-height': '100px', 
+      'border': '1px dashed var(--text-muted)', 
+      'background-color': 'var(--surface)',
+      'border-radius': 'var(--radius-main)',
+      'width': '100%' 
+    };
+  }
+  
+  if (item.type === 'action') {
+    return {
+      ...base,
+      'background-color': 'var(--primary)',
+      'color': '#ffffff', 
+      'border-radius': 'var(--radius-main)',
+      'border': 'none',
+      'cursor': 'pointer'
+    };
   }
 
-  private getDefaultStyles(item: ToolboxItem): Record<string, string> {
-    const base = { padding: '10px', margin: '5px' };
-    if (item.type === 'container') {
-      return { ...base, 'min-height': '100px', border: '1px dashed #ccc', width: '100%' };
-    }
-    return base;
-  }
+  return base;
+}
 
 }

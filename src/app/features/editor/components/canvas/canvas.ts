@@ -2,10 +2,12 @@ import { Component, computed, HostListener, inject, signal } from '@angular/core
 import { EditorService } from '../../../../../core/services/EditorService/editor-service';
 import { WidgetRenderer } from '../widget-renderer/widget-renderer';
 import { ToolboxItem } from '../../../../../core/data/toolbox.data';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-canvas',
-  imports: [WidgetRenderer],
+  imports: [CommonModule, FormsModule, WidgetRenderer],
   templateUrl: './canvas.html',
   styleUrl: './canvas.css',
 })

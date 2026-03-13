@@ -1,29 +1,134 @@
 <div class="viewport" (mousedown)="startDragging($event)" (contextmenu)="$event.preventDefault()">
-  
-  <div class="infinite-surface" [style.transform]="surfaceTransform()">
-    
+
+  <div class="infinite-surface" [style.transform]="surfaceTransform()" [ngStyle]="editor.globalVariables()">
+
     @for (page of editor.pages(); track page.id) {
-      <div class="page-container" [style.left.px]="page.x" [style.top.px]="page.y" (mousedown)="startDragging($event)">
-        <div class="page-label">{{ page.name }}</div>
-        
-        <div class="page-paper" 
-             (dragover)="onDragOver($event)" 
-             (drop)="onDrop($event, page.id)">
-          
-          @for (w of page.widgets; track w.id) {
-            <app-widget-renderer 
-              [widget]="w" 
-              [pageId]="page.id">
-            </app-widget-renderer>
-          }
+    <div class="page-container" [class.ds-special]="page.isDesignSystem" [style.left.px]="page.x"
+      [style.top.px]="page.y" (mousedown)="startDragging($event)">
 
+      <div class="page-label">{{ page.name }}</div>
+
+      <div class="page-paper" (dragover)="onDragOver($event)" (drop)="onDrop($event, page.id)">
+
+        @if (!page.isDesignSystem) {
+        @for (w of page.widgets; track w.id) {
+        <app-widget-renderer [widget]="w" [pageId]="page.id" />
+        }
+        }
+
+        @else {
+        <div class="ds-controls">
+          <section class="ds-group">
+            <div class="ds-group-header">
+              <h4>Couleurs</h4>
+              <span class="ds-badge">Styles Globaux</span>
+            </div>
+
+            <div class="ds-color-grid">
+              <div class="ds-color-card">
+                <div class="ds-color-input-wrapper">
+                  <input type="color" [ngModel]="editor.designSystem().colors.primary"
+                    (ngModelChange)="editor.updateTheme('colors.primary', $event)">
+                </div>
+                <div class="ds-color-info">
+                  <label>Primaire</label>
+                  <code>{{ editor.designSystem().colors.primary }}</code>
+                </div>
+              </div>
+
+              <div class="ds-color-card">
+                <div class="ds-color-input-wrapper">
+                  <input type="color" [ngModel]="editor.designSystem().colors.secondary"
+                    (ngModelChange)="editor.updateTheme('colors.secondary', $event)">
+                </div>
+                <div class="ds-color-info">
+                  <label>Accent</label>
+                  <code>{{ editor.designSystem().colors.secondary }}</code>
+                </div>
+              </div>
+
+              <div class="ds-color-card">
+                <div class="ds-color-input-wrapper">
+                  <input type="color" [ngModel]="editor.designSystem().colors.text"
+                    (ngModelChange)="editor.updateTheme('colors.text', $event)">
+                </div>
+                <div class="ds-color-info">
+                  <label>Texte</label>
+                  <code>{{ editor.designSystem().colors.text }}</code>
+                </div>
+              </div>
+
+              <div class="ds-color-card">
+                <div class="ds-color-input-wrapper">
+                  <input type="color" [ngModel]="editor.designSystem().colors.bg"
+                    (ngModelChange)="editor.updateTheme('colors.bg', $event)">
+                </div>
+                <div class="ds-color-info">
+                  <label>Fond</label>
+                  <code>{{ editor.designSystem().colors.bg }}</code>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="ds-split-row">
+            <section class="ds-group">
+              <h4>Typographie</h4>
+              <div class="ds-control">
+                <select [ngModel]="editor.designSystem().typography.family"
+                  (ngModelChange)="editor.updateTheme('typography.family', $event)">
+                  <option value="'Inter', sans-serif">Inter</option>
+                  <option value="'Playfair Display', serif">Playfair</option>
+                  <option value="'Courier New', monospace">Mono</option>
+                </select>
+              </div>
+              <div class="ds-control">
+                <div class="ds-label-row">
+                  <label>Base</label>
+                  <span>{{editor.designSystem().typography.sizeBase}}px</span>
+                </div>
+                <input type="range" min="12" max="24" [ngModel]="editor.designSystem().typography.sizeBase"
+                  (ngModelChange)="editor.updateTheme('typography.sizeBase', $event)">
+              </div>
+            </section>
+
+            <section class="ds-group">
+              <h4>Structure</h4>
+              <div class="ds-control">
+                <div class="ds-label-row">
+                  <label>Radius</label>
+                  <span>{{editor.designSystem().spacing.radius}}px</span>
+                </div>
+                <input type="range" min="0" max="40" [ngModel]="editor.designSystem().spacing.radius"
+                  (ngModelChange)="editor.updateTheme('spacing.radius', $event)">
+              </div>
+              <div class="ds-control">
+                <div class="ds-label-row">
+                  <label>Padding</label>
+                  <span>{{editor.designSystem().spacing.padding}}px</span>
+                </div>
+                <input type="range" min="0" max="50" [ngModel]="editor.designSystem().spacing.padding"
+                  (ngModelChange)="editor.updateTheme('spacing.padding', $event)">
+              </div>
+            </section>
+          </div>
+
+          <div class="ds-preview-card">
+            <div class="ds-preview-header">
+              <span class="dot"></span> Composant Preview
+            </div>
+            <div class="ds-preview-content">
+              <p>Aperçu du rendu final</p>
+              <div class="ds-button-group">
+                <button class="preview-btn">Primaire</button>
+                <button class="preview-btn secondary">Accent</button>
+              </div>
+            </div>
+          </div>
         </div>
+        }
       </div>
+    </div>
     }
-
-  </div>
-
-  <div class="canvas-controls">
-    <span>Zoom: {{ (zoom() * 100).toFixed(0) }}%</span>
   </div>
 </div>
