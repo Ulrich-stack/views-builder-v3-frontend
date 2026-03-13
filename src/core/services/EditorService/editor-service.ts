@@ -15,14 +15,14 @@ export class EditorService {
   ])
 
   designSystem = signal<DesignSystem>({
-colors: {
-    primary: '#6366f1',  
-    secondary: '#94a3b8',
-    bg: '#0f172a',       
-    surface: '#1e293b',  
-    text: '#f8fafc',     
-    muted: '#64748b'     
-  },
+    colors: {
+      primary: '#6366f1',
+      secondary: '#94a3b8',
+      bg: '#0f172a',
+      surface: '#1e293b',
+      text: '#f8fafc',
+      muted: '#64748b'
+    },
     typography: {
       family: "'Inter', sans-serif",
       sizeBase: 16
@@ -71,6 +71,17 @@ colors: {
 
   selectedWidgetId = signal<string | null>(null);
   selectedPageId = signal<string | null>('page-1');
+
+  deletePage(pageId: string) {
+    if (pageId === 'ds-page') return;
+
+    this.pages.update(pages => pages.filter(p => p.id !== pageId));
+
+    // Si la page supprimée était celle sélectionnée, on réinitialise
+    if (this.selectedPageId() === pageId) {
+      this.selectedPageId.set(null);
+    }
+  }
 
   updateTheme(path: string, value: any) {
     this.designSystem.update(ds => {
@@ -198,46 +209,46 @@ colors: {
       }));
   }
 
-private getDefaultContent(item: ToolboxItem): string {
-  switch (item.type) {
-    case 'text': return 'Texte';
-    case 'action': return 'Bouton';
-    default: return '';
+  private getDefaultContent(item: ToolboxItem): string {
+    switch (item.type) {
+      case 'text': return 'Texte';
+      case 'action': return 'Bouton';
+      default: return '';
+    }
   }
-}
 
-private getDefaultStyles(item: ToolboxItem): Record<string, string> {
-  // On utilise les variables CSS définies dans globalVariables
-  const base = { 
-    'padding': 'var(--spacing-base)', 
-    'margin': '5px',
-    'font-family': 'var(--font-family)',
-    'color': 'var(--text)'
-  };
-
-  if (item.type === 'container') {
-    return { 
-      ...base, 
-      'min-height': '100px', 
-      'border': '1px dashed var(--text-muted)', 
-      'background-color': 'var(--surface)',
-      'border-radius': 'var(--radius-main)',
-      'width': '100%' 
+  private getDefaultStyles(item: ToolboxItem): Record<string, string> {
+    // On utilise les variables CSS définies dans globalVariables
+    const base = {
+      'padding': 'var(--spacing-base)',
+      'margin': '5px',
+      'font-family': 'var(--font-family)',
+      'color': 'var(--text)'
     };
-  }
-  
-  if (item.type === 'action') {
-    return {
-      ...base,
-      'background-color': 'var(--primary)',
-      'color': '#ffffff', 
-      'border-radius': 'var(--radius-main)',
-      'border': 'none',
-      'cursor': 'pointer'
-    };
-  }
 
-  return base;
-}
+    if (item.type === 'container') {
+      return {
+        ...base,
+        'min-height': '100px',
+        'border': '1px dashed var(--text-muted)',
+        'background-color': 'var(--surface)',
+        'border-radius': 'var(--radius-main)',
+        'width': '100%'
+      };
+    }
+
+    if (item.type === 'action') {
+      return {
+        ...base,
+        'background-color': 'var(--primary)',
+        'color': '#ffffff',
+        'border-radius': 'var(--radius-main)',
+        'border': 'none',
+        'cursor': 'pointer'
+      };
+    }
+
+    return base;
+  }
 
 }
