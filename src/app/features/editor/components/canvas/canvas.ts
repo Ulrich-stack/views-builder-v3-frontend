@@ -22,9 +22,13 @@ export class Canvas {
 
   isDragging = false;
 
-  // Calcul dynamique du style de la surface
   surfaceTransform = computed(() => {
     return `translate(${this.offsetX()}px, ${this.offsetY()}px) scale(${this.zoom()})`;
+  });
+
+  labelScale = computed(() => {
+    const currentZoom = this.zoom();
+    return 1 / currentZoom;
   });
 
   @HostListener("wheel", ["$event"])
@@ -51,8 +55,35 @@ export class Canvas {
     this.offsetY.set(mouseY - worldY * newZoom);
   }
 
+  startPageDrag(event: MouseEvent, page: Page) {
+    // Empêche la surface infinie de bouger en même temps
+    event.stopPropagation();
+    event.preventDefault();
 
-  // Dans ta classe Canvas
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const initialPageX = page.x;
+    const initialPageY = page.y;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      // Calcul de la distance parcourue ajustée par le zoom
+      const deltaX = (moveEvent.clientX - startX) / this.zoom();
+      const deltaY = (moveEvent.clientY - startY) / this.zoom();
+
+      // Mise à jour de la position de la page
+      page.x = initialPageX + deltaX;
+      page.y = initialPageY + deltaY;
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }
+
   startResizing(event: MouseEvent, page: Page) {
     event.preventDefault();
     event.stopPropagation();

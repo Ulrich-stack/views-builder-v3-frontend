@@ -40,11 +40,59 @@
 }
 
 .page-label {
-  color: #666;
+  position: absolute;
+  top: -45px; /* On le sort un peu plus haut de la page */
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  background: rgba(30, 30, 30, 0.8); /* Fond semi-transparent pro */
+  border-radius: 6px;
+  transform-origin: left bottom;
+  backdrop-filter: blur(4px); /* Effet flou derrière le label */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.page-name-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  width: auto;
+  max-width: 200px;
+  outline: none;
+  padding: 0;
+}
+
+.dimension-badge {
+  color: var(--primary); 
+  font-size: 11px;
+  font-family: monospace;
+  opacity: 0.8;
+}
+
+.ds-title {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.page-label:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--primary);
+}
+
+.page-label:active {
+  cursor: grabbing; /* Main fermée pendant le drag */
+}
+
+.page-container:active {
+  z-index: 100;
 }
 
 .page-paper {
@@ -79,10 +127,10 @@
   border: 1px solid #222;
   width: 420px;
   padding: 24px;
-  
-  min-height: auto; 
-  height: fit-content; 
-  display: block; 
+
+  min-height: auto;
+  height: fit-content;
+  display: block;
 }
 .ds-group h4 {
   color: #888;
@@ -209,11 +257,10 @@ input[type='color'] {
   gap: 4px;
 }
 
-
 .ds-control select {
-  appearance: none; 
+  appearance: none;
   -webkit-appearance: none;
-  
+
   width: 100%;
   background-color: #1a1a1a;
   color: #eee;
@@ -224,13 +271,15 @@ input[type='color'] {
   font-family: inherit;
   cursor: pointer;
   outline: none;
-  
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 30px;
-  
-  transition: border-color 0.2s, background-color 0.2s;
+
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 }
 
 .ds-control select:hover {
@@ -259,3 +308,5 @@ input[type='color'] {
 .page-paper:hover .resizer {
   opacity: 1;
 }
+
+

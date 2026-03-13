@@ -1,39 +1,41 @@
 <div class="viewport" (mousedown)="startDragging($event)" (contextmenu)="$event.preventDefault()">
 
-  <div class="infinite-surface" 
-       [style.transform]="surfaceTransform()" 
-       [ngStyle]="editor.globalVariables()">
+  <div class="infinite-surface" [style.transform]="surfaceTransform()" [ngStyle]="editor.globalVariables()">
 
     @for (page of editor.pages(); track page.id) {
-    <div class="page-container" 
-         [class.ds-special]="page.isDesignSystem" 
-         [style.left.px]="page.x"
-         [style.top.px]="page.y" 
-         (mousedown)="startDragging($event)">
+    <div class="page-container" [class.ds-special]="page.isDesignSystem" [style.left.px]="page.x"
+      [style.top.px]="page.y" (mousedown)="startDragging($event)">
 
-      <div class="page-label">
-        {{ page.name }} 
-        @if (!page.isDesignSystem && (page.width || page.height)) {
-          <span class="dimension-badge">
-            {{ page.width || 800 | number:'1.0-0' }} x {{ page.height || 1000 | number:'1.0-0' }}
-          </span>
+      <div class="page-label" (mousedown)="startPageDrag($event, page)"
+        [style.transform]="'scale(' + labelScale() + ')'">
+
+        @if (page.isDesignSystem) {
+        <span class="ds-title">{{ page.name }}</span>
+        } @else {
+        <input class="page-name-input" [(ngModel)]="page.name" (mousedown)="$event.stopPropagation()"
+          spellcheck="false">
+
+        @if (page.width || page.height) {
+        <span class="dimension-badge">
+          {{ page.width || 800 | number:'1.0-0' }} × {{ page.height || 1000 | number:'1.0-0' }}
+        </span>
+        }
         }
       </div>
 
-      <div class="page-paper" 
-           [style.width.px]="page.width || (page.isDesignSystem ? 420 : 800)"
-           [style.height.px]="page.height || (page.isDesignSystem ? null : 1000)"
-           [style.min-height]="page.isDesignSystem ? 'auto' : '100px'" 
-           (dragover)="onDragOver($event)"
-           (drop)="onDrop($event, page.id)">
+      <div class="page-paper" (mousedown)="$event.stopPropagation()"
+        [style.width.px]="page.width || (page.isDesignSystem ? 420 : 800)"
+        [style.height.px]="page.height || (page.isDesignSystem ? null : 1000)"
+        [style.min-height]="page.isDesignSystem ? 'auto' : '100px'" (dragover)="onDragOver($event)"
+        (drop)="onDrop($event, page.id)">
 
         @if (!page.isDesignSystem) {
-          
-          <div class="resizer" (mousedown)="startResizing($event, page)"></div>
 
-          @for (w of page.widgets; track w.id) {
-            <app-widget-renderer [widget]="w" [pageId]="page.id" />
-          }
+        <div class="resizer" (mousedown)="startResizing($event, page)"></div>
+
+        @for (w of page.widgets; track w.id) {
+        <app-widget-renderer [widget]="w" [pageId]="page.id" />
+        }
         }
 
         @else {
