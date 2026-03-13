@@ -1,9 +1,9 @@
-<div class="viewport" (mousedown)="startDragging($event)">
+<div class="viewport" (mousedown)="startDragging($event)" (contextmenu)="$event.preventDefault()">
   
   <div class="infinite-surface" [style.transform]="surfaceTransform()">
     
     @for (page of editor.pages(); track page.id) {
-      <div class="page-container" [style.left.px]="page.x" [style.top.px]="page.y">
+      <div class="page-container" [style.left.px]="page.x" [style.top.px]="page.y" (mousedown)="startDragging($event)">
         <div class="page-label">{{ page.name }}</div>
         
         <div class="page-paper" 

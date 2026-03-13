@@ -1,3 +1,10 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 .viewport {
   width: 100%;
   height: 100%;
@@ -5,6 +12,7 @@
   position: relative;
   background-color: #121212;
   cursor: grab;
+  touch-action: none;
 }
 
 .viewport:active {
@@ -20,6 +28,8 @@
   background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
   background-size: 40px 40px;
   transform-origin: 0 0; 
+  will-change: transform; 
+  pointer-events: auto;
 }
 
 .page-container {

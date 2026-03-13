@@ -25,32 +25,55 @@ export class Canvas {
   });
 
   @HostListener("wheel", ["$event"])
-  onWheel(event: WheelEvent){
+  onWheel(event: WheelEvent) {
     event.preventDefault();
-    const zoomSpeed = 0.001;
-    const newZoom = this.zoom() - event.deltaY * zoomSpeed;
-    // On limite le zoom entre 0.1 (10%) et 3 (300%)
-    this.zoom.set(Math.min(Math.max(0.1, newZoom), 3));
+
+    const zoomSpeed = 0.01;
+    const delta = -event.deltaY;
+    const oldZoom = this.zoom();
+
+    const newZoom = Math.min(Math.max(0.1, oldZoom + delta * zoomSpeed * oldZoom), 3);
+
+    if (oldZoom === newZoom) return;
+
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    const worldX = (mouseX - this.offsetX()) / oldZoom;
+    const worldY = (mouseY - this.offsetY()) / oldZoom;
+
+    this.zoom.set(newZoom);
+
+    this.offsetX.set(mouseX - worldX * newZoom);
+    this.offsetY.set(mouseY - worldY * newZoom);
   }
 
-  startDragging(event: MouseEvent){
-    if(event.button === 1 || event.shiftKey){
-      this.isDragging = true;
-      event.preventDefault();
-    }
+startDragging(event: MouseEvent) {
+  // On ne déclenche le "Pan" (déplacement canvas) QUE si :
+  // - On utilise le clic milieu (molette)
+  // - OU on utilise le clic gauche mais avec la touche SHIFT
+  const isPanCommand = event.button === 1 || (event.button === 0 && event.shiftKey);
+
+  if (isPanCommand) {
+    this.isDragging = true;
+    document.body.style.cursor = 'grabbing';
+    event.preventDefault();
+    event.stopPropagation();
   }
+}
 
   @HostListener("window:mousemove", ["$event"])
-  onMouseMove(event: MouseEvent){
-    if(this.isDragging){
+  onMouseMove(event: MouseEvent) {
+    if (this.isDragging) {
       this.offsetX.update(x => x + event.movementX);
       this.offsetY.update(y => y + event.movementY);
     }
   }
 
   @HostListener("window:mouseup")
-  stopDragging(){
+  stopDragging() {
     this.isDragging = false;
+    document.body.style.cursor = 'default';
   }
 
   onDragOver(event: DragEvent) {
