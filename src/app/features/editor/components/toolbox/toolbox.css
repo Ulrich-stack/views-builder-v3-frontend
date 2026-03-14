@@ -1,42 +1,50 @@
-:host{
+:host {
     display: block;
     height: 100%;
     overflow: hidden;
 }
 
-.toolbox-container{
+.toolbox-container {
     display: flex;
     flex-direction: column;
     height: 100%;
+    background-color: var(--sidebar-bg, #0f0f0f); /* Optionnel : force le fond sombre */
 }
 
-.toolbox-header{
+.toolbox-header {
     padding: 1.25rem;
     border-bottom: 1px solid var(--sidebar-border);
 }
 
-.toolbox-header h3{
+.toolbox-header h3 {
     font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
     color: var(--text-second);
+    margin: 0;
 }
 
-.search-box{
+.search-box {
     padding: 1rem;
 }
 
-.search-box input{
+.search-box input {
     width: 100%;
     background-color: var(--item-bg);
     border: 1px solid var(--sidebar-border);
     border-radius: 6px;
-    padding: 0.5rem;
+    padding: 0.6rem 0.8rem;
     color: white;
     font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
 }
 
-.categories-list{
+.search-box input:focus {
+    border-color: var(--accent);
+}
+
+.categories-list {
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
@@ -44,40 +52,96 @@
     scrollbar-color: var(--sidebar-border) transparent;
 }
 
-.category-title{
+.category-title {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     color: var(--text-second);
     margin-bottom: 0.75rem;
     margin-top: 1.5rem;
 }
 
-.items-grid{
+.category:first-child .category-title {
+    margin-top: 0;
+}
+
+.items-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
 }
 
-.toolbox-item{
+/* --- STYLE DE BASE DES ITEMS --- */
+.toolbox-item {
+    position: relative;
     background-color: var(--item-bg);
     border: 1px solid var(--sidebar-border);
     border-radius: 8px;
-    padding: 0.75rem;
+    padding: 1rem 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     cursor: grab;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-second);
 }
 
-.toolbox-item:hover{
+.toolbox-item:hover {
     background-color: var(--item-hover);
     border-color: var(--accent);
     transform: translateY(-2px);
+    color: white; /* Le texte et l'icône s'illuminent au survol */
 }
 
-.item-label{
+.toolbox-item:active {
+    cursor: grabbing;
+    transform: translateY(0);
+}
+
+.item-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.5px;
+    transition: color 0.2s;
+}
+
+.toolbox-item:hover .item-icon {
+    color: var(--accent);
+}
+
+.item-label {
     font-size: 0.75rem;
     text-align: center;
+    font-weight: 500;
+}
+
+.toolbox-item.is-blueprint {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.05) 0%, var(--item-bg) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.toolbox-item.is-blueprint:hover {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.15) 0%, var(--item-hover) 100%);
+    border-color: #6366f1;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15); 
+    color: #fff;
+}
+
+.toolbox-item.is-blueprint:hover .item-icon {
+    color: #6366f1;
+}
+
+.magic-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #6366f1;
+    box-shadow: 0 0 8px #6366f1;
 }

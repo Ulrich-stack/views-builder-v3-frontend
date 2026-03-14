@@ -34,8 +34,7 @@
 
       <div class="page-paper" (mousedown)="$event.stopPropagation()"
         [style.width.px]="page.width || (page.isDesignSystem ? 420 : 800)"
-        [style.height.px]="page.height || (page.isDesignSystem ? null : 1000)"
-        [style.min-height]="page.isDesignSystem ? 'auto' : '100px'" (dragover)="onDragOver($event)"
+        [style.min-height.px]="page.height || (page.isDesignSystem ? null : 1000)" (dragover)="onDragOver($event)"
         (drop)="onDrop($event, page.id)">
 
         @if (!page.isDesignSystem) {
@@ -52,7 +51,6 @@
           <section class="ds-group">
             <div class="ds-group-header">
               <h4>Couleurs</h4>
-              <span class="ds-badge">Styles Globaux</span>
             </div>
 
             <div class="ds-color-grid">

@@ -4,7 +4,7 @@
     </header>
 
     <div class="search-box">
-        <input type="text" placeholder="Rechercher un tag...">
+        <input type="text" placeholder="Rechercher un composant...">
     </div>
 
     <div class="categories-list">
@@ -12,11 +12,21 @@
             <div class="category">
                 <span class="category-title"> {{cat.name}} </span>
                 <div class="items-grid">
-                    @for ( item of cat.items; track item.label) {
-                        <div class="toolbox-item" draggable="true" (dragstart)="onDragStart($event, item)">
+                    @for (item of cat.items; track item.label) {
+                        
+                        <div class="toolbox-item" 
+                             [class.is-blueprint]="item.type === 'blueprint'" 
+                             draggable="true" 
+                             (dragstart)="onDragStart($event, item)">
+                            
                             <lucide-angular [name]="item.icon" class="item-icon"></lucide-angular>
-                        <span class="item-label"> {{item.label}} </span>
+                            <span class="item-label"> {{item.label}} </span>
+
+                            @if (item.type === 'blueprint') {
+                                <span class="magic-dot" title="Composant Intelligent"></span>
+                            }
                         </div>
+
                     }
                 </div>
             </div>

@@ -2,7 +2,7 @@
   [id]="widget().id"
   [ngStyle]="widget().styles"
   [class.selected]="editor.selectedWidgetId() === widget().id"
-  [class.is-container]="widget().type === 'container'"
+  [class.is-container]="widget().children" 
   (dragstart)="onDragStart($event)"
   (dragover)="onDragOver($event)"
   (drop)="onDrop($event)"
@@ -10,33 +10,44 @@
   class="widget-wrapper"
   draggable="true"
 >
-  @switch (widget().type) {
-    
-    @case ('container') {
-      <div class="container-inner">
-        @for (child of widget().children; track child.id) {
-          <app-widget-renderer 
-            [widget]="child" 
-            [pageId]="pageId()">
-          </app-widget-renderer>
-        }
-      </div>
-    }
-
-    @case ('text') {
-      @switch (widget().element) {
-        @case ('h1') { <h1>{{ widget().content }}</h1> }
-        @case ('h2') { <h2>{{ widget().content }}</h2> }
-        @default { <p>{{ widget().content }}</p> }
+@switch (widget().type) {
+  
+  @case ('container') {
+    <div class="container-inner">
+      @for (child of widget().children; track child.id) {
+        <app-widget-renderer [widget]="child" [pageId]="pageId()"></app-widget-renderer>
       }
-    }
+    </div>
+  }
 
-    @case ('action') {
-      <button class="btn-render">{{ widget().content }}</button>
-    }
-
-    @case ('media') {
-      <img [src]="widget().config['src'] || 'https://via.placeholder.com/150'" style="max-width: 100%">
+  @case ('text') {
+    @switch (widget().element) {
+      @case ('h1') { <h1>{{ widget().content }}</h1> }
+      @case ('h2') { <h2>{{ widget().content }}</h2> }
+      @case ('a') { <a href="javascript:void(0)">{{ widget().content }}</a> }
+      @default { <p>{{ widget().content }}</p> }
     }
   }
+
+  @case ('action') {
+    <button class="btn-render">{{ widget().content }}</button>
+  }
+
+  @case ('input') {
+    @switch (widget().element) {
+      @case ('textarea') { <textarea [placeholder]="widget().name"></textarea> }
+      @case ('checkbox') { <input type="checkbox"> }
+      @default { <input type="text" [placeholder]="widget().name"> }
+    }
+  }
+
+  @case ('media') {
+    @if (widget().element === 'img') {
+      <img [src]="widget().config['src'] || 'https://via.placeholder.com/150'">
+    }
+    @if (widget().element === 'lucide-icon') {
+      <div class="icon-placeholder">◈</div>
+    }
+  }
+}
 </div>

@@ -5,14 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { DesignSystem } from '../../models/design-sytem.model';
 import { Page } from '../../models/page.model';
 
-
-
 @Injectable({
   providedIn: 'root',
 })
 export class EditorService {
-  pages = signal<Page[]>([
-  ])
+  pages = signal<Page[]>([]);
 
   designSystem = signal<DesignSystem>({
     colors: {
@@ -28,11 +25,10 @@ export class EditorService {
       sizeBase: 16
     },
     spacing: {
-      radius: 4,
+      radius: 8, // Mis à 8 pour de jolis arrondis par défaut
       padding: 16
     }
   });
-
 
   constructor() {
     this.pages.set([
@@ -48,7 +44,6 @@ export class EditorService {
     ]);
   }
 
-  // Génération automatique des variables CSS
   globalVariables = computed(() => {
     const ds = this.designSystem();
     return {
@@ -62,22 +57,17 @@ export class EditorService {
       '--font-size-base': ds.typography.sizeBase + 'px',
       '--radius-main': ds.spacing.radius + 'px',
       '--spacing-base': ds.spacing.padding + 'px',
-      // Calcul automatique d'échelles (H1, H2, etc.)
       '--font-size-lg': (ds.typography.sizeBase * 1.5) + 'px',
       '--font-size-xl': (ds.typography.sizeBase * 2.5) + 'px',
     };
   });
-
 
   selectedWidgetId = signal<string | null>(null);
   selectedPageId = signal<string | null>('page-1');
 
   deletePage(pageId: string) {
     if (pageId === 'ds-page') return;
-
     this.pages.update(pages => pages.filter(p => p.id !== pageId));
-
-    // Si la page supprimée était celle sélectionnée, on réinitialise
     if (this.selectedPageId() === pageId) {
       this.selectedPageId.set(null);
     }
@@ -86,14 +76,11 @@ export class EditorService {
   updateTheme(path: string, value: any) {
     this.designSystem.update(ds => {
       const newDs = JSON.parse(JSON.stringify(ds));
-
       const keys = path.split('.');
       let current: any = newDs;
-
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
       }
-
       current[keys[keys.length - 1]] = value;
       return newDs;
     });
@@ -102,7 +89,6 @@ export class EditorService {
   selectedWidget = computed(() => {
     const id = this.selectedWidgetId();
     if (!id) return null;
-
     for (const page of this.pages()) {
       const found = this.findWidgetRecursive(page.widgets, id);
       if (found) return found;
@@ -110,8 +96,12 @@ export class EditorService {
     return null;
   });
 
-
+  // CRÉATION DES WIDGETS ET BLUEPRINTS
   createWidgetFromToolboxItem(item: ToolboxItem): Widget {
+    if (item.type === 'blueprint' && item.blueprint) {
+      return this.mapBlueprintToWidget(item.blueprint, item.label);
+    }
+
     const isContainer = item.type === 'container';
     return {
       id: uuidv4(),
@@ -125,20 +115,29 @@ export class EditorService {
     };
   }
 
+  // MÉTHODE RÉCURSIVE POUR LES BLUEPRINTS
+  private mapBlueprintToWidget(bp: any, label: string): Widget {
+    const id = uuidv4();
+    return {
+      id: id,
+      type: (bp.children ? 'container' : bp.type) as WidgetType,
+      element: bp.element || 'div',
+      name: label,
+      content: bp.content || '',
+      styles: { ...bp.styles },
+      config: bp.config || {},
+      children: bp.children ? bp.children.map((c: any) => this.mapBlueprintToWidget(c, 'Child Component')) : undefined
+    };
+  }
 
   addWidget(widget: Widget, parentId: string | null = null, pageId: string | null = null) {
     const targetPageId = pageId || this.selectedPageId();
-
     this.pages.update(currentPages => {
       return currentPages.map(page => {
         if (page.id !== targetPageId) return page;
-
-        // Si on ajoute à la racine de la page
         if (!parentId) {
           return { ...page, widgets: [...page.widgets, widget] };
         }
-
-        // Sinon, on cherche récursivement dans les containers de la page
         const newWidgets = [...page.widgets];
         this.insertInParentRecursive(newWidgets, parentId, widget);
         return { ...page, widgets: newWidgets };
@@ -146,24 +145,19 @@ export class EditorService {
     });
   }
 
-
   moveWidget(widgetId: string, targetParentId: string | null, targetPageId: string) {
     this.pages.update(currentPages => {
       let draggedWidget: Widget | null = null;
-
-      // On nettoie toutes les pages pour être sûr de supprimer l'ancienne instance
       const cleanedPages = currentPages.map(page => {
         const found = this.findWidgetRecursive(page.widgets, widgetId);
-        if (found) draggedWidget = { ...found }; // On garde une copie
+        if (found) draggedWidget = { ...found };
         return { ...page, widgets: this.removeRecursive(page.widgets, widgetId) };
       });
 
       if (!draggedWidget) return currentPages;
 
-      // 2. L'insérer dans la destination
       return cleanedPages.map(page => {
         if (page.id !== targetPageId) return page;
-
         if (!targetParentId) {
           return { ...page, widgets: [...page.widgets, draggedWidget!] };
         } else {
@@ -174,7 +168,6 @@ export class EditorService {
       });
     });
   }
-
 
   private findWidgetRecursive(widgets: Widget[], id: string): Widget | null {
     for (const w of widgets) {
@@ -218,10 +211,8 @@ export class EditorService {
   }
 
   private getDefaultStyles(item: ToolboxItem): Record<string, string> {
-    // On utilise les variables CSS définies dans globalVariables
     const base = {
       'padding': 'var(--spacing-base)',
-      'margin': '5px',
       'font-family': 'var(--font-family)',
       'color': 'var(--text)'
     };
@@ -250,5 +241,4 @@ export class EditorService {
 
     return base;
   }
-
 }
