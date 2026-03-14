@@ -15,7 +15,6 @@ interface ToolboxCategory {
   styleUrl: './toolbox.css',
 })
 export class Toolbox {
-  readonly FileIcon = FileIcon;
   categories: ToolboxCategory[] = WIDGET_CATALOG;
 
   onDragStart(event: DragEvent, item: ToolboxItem){

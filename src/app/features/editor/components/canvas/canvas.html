@@ -1,6 +1,6 @@
 <div class="viewport" (mousedown)="startDragging($event)" (contextmenu)="$event.preventDefault()">
 
-  <div class="infinite-surface" [style.transform]="surfaceTransform()" [ngStyle]="editor.globalVariables()">
+  <div class="infinite-surface" [style.transform]="surfaceTransform()" [ngStyle]="editor.globalVariables()" (click)="editor.selectedWidgetId.set(null)">
 
     @for (page of editor.pages(); track page.id) {
     <div class="page-container" [class.ds-special]="page.isDesignSystem" [style.left.px]="page.x"

@@ -1,1 +1,159 @@
-<p>properties works!</p>
+<div class="figma-panel">
+    @if (editor.selectedWidget(); as widget) {
+    <div class="figma-header space-between">
+        <div class="header-title">
+            <lucide-angular [name]="widget.type === 'container' ? 'box' : 'type'" class="icon-sm"></lucide-angular>
+            <span class="layer-name">{{ widget.name || widget.type }}</span>
+        </div>
+
+        <button class="icon-btn" (click)="resetStyles()" title="Réinitialiser l'apparence">
+            <lucide-angular name="trash2" class="icon-sm"></lucide-angular>
+        </button>
+    </div>
+
+    @if (widget.type === 'text' || widget.type === 'action') {
+    <div class="figma-section">
+        <div class="section-title">Text Content</div>
+        <textarea [ngModel]="widget.content" (ngModelChange)="updateContent($event)" class="figma-input figma-textarea"
+            rows="2"></textarea>
+    </div>
+    }
+
+    <div class="figma-section">
+        <div class="figma-grid-2">
+            <div class="input-group">
+                <span class="label-icon">W</span>
+                <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['width']) || 'auto'"
+                    (ngModelChange)="updateStyle('width', $event)">
+            </div>
+            <div class="input-group">
+                <span class="label-icon">H</span>
+                <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['height']) || 'auto'"
+                    (ngModelChange)="updateStyle('height', $event)">
+            </div>
+        </div>
+
+        <div class="figma-grid-2 mt-sm">
+            <div class="input-group">
+                <lucide-angular name="corner-down-right" class="label-icon"></lucide-angular>
+                <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['border-radius']) || '0'"
+                    (ngModelChange)="updateStyle('border-radius', $event)"
+                    [class.linked]="isLinked(widget.styles['border-radius'])">
+            </div>
+            <div class="input-group">
+                <lucide-angular name="maximize" class="label-icon"></lucide-angular>
+                <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['padding']) || '0'"
+                    (ngModelChange)="updateStyle('padding', $event)"
+                    [class.linked]="isLinked(widget.styles['padding'])">
+            </div>
+        </div>
+    </div>
+
+    <div class="figma-section">
+        <div class="section-title space-between">
+            <span>Auto layout (Flex)</span>
+            <select class="figma-select-small" [ngModel]="getCleanValue(widget.styles['display']) || 'block'"
+                (ngModelChange)="updateStyle('display', $event)">
+                <option value="block">None</option>
+                <option value="flex">Flex</option>
+                <option value="grid">Grid</option>
+            </select>
+        </div>
+
+        @if (getCleanValue(widget.styles['display']) === 'flex') {
+        <div class="figma-grid-2 mt-sm">
+            <div class="action-bar">
+                <button class="icon-btn" [class.active]="widget.styles['flex-direction'] === 'row'"
+                    (click)="updateStyle('flex-direction', 'row')" title="Direction Row">
+                    <lucide-angular name="arrow-right" class="icon-sm"></lucide-angular>
+                </button>
+                <button class="icon-btn" [class.active]="widget.styles['flex-direction'] === 'column'"
+                    (click)="updateStyle('flex-direction', 'column')" title="Direction Column">
+                    <lucide-angular name="arrow-down" class="icon-sm"></lucide-angular>
+                </button>
+            </div>
+            <div class="input-group">
+                <span class="label-icon">Gap</span>
+                <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['gap']) || '0'"
+                    (ngModelChange)="updateStyle('gap', $event)" [class.linked]="isLinked(widget.styles['gap'])">
+            </div>
+        </div>
+        }
+    </div>
+
+    @if (widget.type === 'text' || widget.type === 'action') {
+    <div class="figma-section">
+        <div class="section-title">Typography</div>
+        <div class="input-group full-width mt-sm">
+            <select class="figma-input figma-select" [ngModel]="widget.styles['font-weight'] || 'normal'"
+                (ngModelChange)="updateStyle('font-weight', $event)">
+                <option value="normal">Regular</option>
+                <option value="500">Medium</option>
+                <option value="bold">Bold</option>
+            </select>
+        </div>
+        <div class="figma-grid-2 mt-sm">
+            <div class="input-group">
+                <span class="label-icon">Size</span>
+                <input type="text" class="figma-input"
+                    [ngModel]="getCleanValue(widget.styles['font-size']) || 'inherit'"
+                    (ngModelChange)="updateStyle('font-size', $event)"
+                    [class.linked]="isLinked(widget.styles['font-size'])">
+            </div>
+            <div class="action-bar">
+                <button class="icon-btn active"><lucide-angular name="text-align-left"
+                        class="icon-sm"></lucide-angular></button>
+                <button class="icon-btn"><lucide-angular name="text-align-center"
+                        class="icon-sm"></lucide-angular></button>
+                <button class="icon-btn"><lucide-angular name="text-align-right"
+                        class="icon-sm"></lucide-angular></button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <div class="figma-section">
+        <div class="section-title">Fill</div>
+
+        <div class="color-row mt-sm">
+            <div class="color-swatch-wrapper" [class.linked]="isLinked(widget.styles['background-color'])">
+                <input type="color" [ngModel]="resolveColor(widget.styles['background-color'])"
+                    (ngModelChange)="updateStyle('background-color', $event)" class="color-picker">
+            </div>
+            <input type="text" class="figma-input color-hex"
+                [ngModel]="getCleanValue(widget.styles['background-color']) || 'transparent'"
+                (ngModelChange)="updateStyle('background-color', $event)">
+            <input type="text" class="figma-input color-alpha" [ngModel]="widget.styles['opacity'] || '1'"
+                (ngModelChange)="updateStyle('opacity', $event)" title="Opacity (0-1)">
+        </div>
+
+        @if (widget.type === 'text' || widget.type === 'action') {
+        <div class="color-row mt-sm">
+            <div class="color-swatch-wrapper" [class.linked]="isLinked(widget.styles['color'])">
+                <input type="color" [ngModel]="resolveColor(widget.styles['color'])"
+                    (ngModelChange)="updateStyle('color', $event)" class="color-picker">
+            </div>
+            <input type="text" class="figma-input color-hex"
+                [ngModel]="getCleanValue(widget.styles['color']) || 'inherit'"
+                (ngModelChange)="updateStyle('color', $event)">
+        </div>
+        }
+    </div>
+
+    <div class="figma-section">
+        <div class="section-title space-between">
+            <span>Stroke</span>
+            <lucide-angular name="plus" class="icon-sm clickable"></lucide-angular>
+        </div>
+        <div class="input-group full-width mt-sm">
+            <input type="text" class="figma-input" [ngModel]="getCleanValue(widget.styles['border']) || 'none'"
+                (ngModelChange)="updateStyle('border', $event)" placeholder="ex: 1px solid #333">
+        </div>
+    </div>
+
+    } @else {
+    <div class="empty-state">
+        No selection
+    </div>
+    }
+</div>

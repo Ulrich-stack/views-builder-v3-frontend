@@ -1,0 +1,211 @@
+:host {
+  display: block;
+  height: 100%;
+  border-left: 1px solid #2c2c2c;
+  background-color: #1e1e1e; /* Fond Figma Dark */
+  color: #e5e5e5;
+  font-family: 'Inter', -apple-system, sans-serif;
+  user-select: none;
+}
+
+.figma-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Cache la scrollbar pour faire plus natif */
+}
+
+/* --- EN-TÊTE --- */
+.figma-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2c2c2c;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.figma-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.figma-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-group.full-width {
+  width: 100%;
+}
+
+.label-icon {
+  font-size: 11px;
+  color: #8a8a8a;
+  width: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.figma-input {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #e5e5e5;
+  font-size: 11px;
+  padding: 4px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.1s;
+}
+
+.figma-input:hover {
+  border-color: #444;
+}
+
+.figma-input:focus {
+  border-color: #18a0fb; 
+  background-color: #1e1e1e;
+}
+
+.figma-input.linked {
+  color: #18a0fb;
+  background-color: rgba(24, 160, 251, 0.1);
+}
+
+.figma-textarea {
+  resize: vertical;
+  background-color: #2c2c2c;
+  border-color: #2c2c2c;
+}
+
+.figma-select {
+  appearance: none;
+  background-color: #2c2c2c;
+  border-color: #2c2c2c;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.figma-select-small {
+  background: transparent;
+  border: none;
+  color: #8a8a8a;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.figma-select-small:hover {
+  color: #fff;
+}
+
+/* --- BARRE D'ACTIONS (FLEX/ALIGN) --- */
+.action-bar {
+  display: flex;
+  background-color: #2c2c2c;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.icon-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  color: #8a8a8a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.icon-btn:hover {
+  color: #fff;
+}
+
+.icon-btn.active {
+  background-color: #444;
+  color: #fff;
+}
+
+/* --- GESTION DES COULEURS (FILL) --- */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-swatch-wrapper {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #444;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.color-swatch-wrapper.linked {
+  border-color: #18a0fb;
+}
+
+.color-picker {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+.color-hex {
+  flex: 1;
+  text-transform: uppercase;
+}
+
+.color-alpha {
+  width: 40px;
+  text-align: right;
+}
+
+/* --- UTILITAIRES --- */
+.mt-sm { margin-top: 8px; }
+.icon-sm { width: 14px; height: 14px; }
+.clickable { cursor: pointer; color: #8a8a8a; }
+.clickable:hover { color: #fff; }
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 12px;
+  color: #8a8a8a;
+}
