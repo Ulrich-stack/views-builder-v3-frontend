@@ -55,6 +55,29 @@ export class Canvas {
     this.offsetY.set(mouseY - worldY * newZoom);
   }
 
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Vérifie si on appuie sur Ctrl (Windows) ou Cmd (Mac)
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const modifier = isMac ? event.metaKey : event.ctrlKey;
+
+    if (modifier && event.key === 'z') {
+      if (event.shiftKey) {
+        // Cmd + Shift + Z (Redo)
+        event.preventDefault();
+        this.editor.redo();
+      } else {
+        // Cmd + Z (Undo)
+        event.preventDefault();
+        this.editor.undo();
+      }
+    } else if (modifier && event.key === 'y') {
+      // Ctrl + Y (Redo sur Windows)
+      event.preventDefault();
+      this.editor.redo();
+    }
+  }
+
   startPageDrag(event: MouseEvent, page: Page) {
     // Empêche la surface infinie de bouger en même temps
     event.stopPropagation();

@@ -17,12 +17,16 @@ export class Properties {
   updateStyle(property: string, value: string) {
     const widget = this.editor.selectedWidget();
     if (!widget) return;
+
+    this.editor.saveHistory(); 
     widget.styles = { ...widget.styles, [property]: value };
   }
 
   updateContent(value: string) {
     const widget = this.editor.selectedWidget();
     if (!widget) return;
+
+    this.editor.saveHistory();
     widget.content = value;
   }
 
@@ -49,6 +53,8 @@ export class Properties {
 resetStyles() {
   const widget = this.editor.selectedWidget();
   if (!widget) return;
+
+  this.editor.saveHistory();
 
     const layoutProps = [
       'display', 'grid-template-columns', 'grid-auto-rows', 

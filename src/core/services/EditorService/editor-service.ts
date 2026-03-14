@@ -67,6 +67,7 @@ export class EditorService {
 
   deletePage(pageId: string) {
     if (pageId === 'ds-page') return;
+    this.saveHistory();
     this.pages.update(pages => pages.filter(p => p.id !== pageId));
     if (this.selectedPageId() === pageId) {
       this.selectedPageId.set(null);
@@ -131,6 +132,8 @@ export class EditorService {
   }
 
   addWidget(widget: Widget, parentId: string | null = null, pageId: string | null = null) {
+    this.saveHistory(); 
+
     const targetPageId = pageId || this.selectedPageId();
     this.pages.update(currentPages => {
       return currentPages.map(page => {
@@ -146,6 +149,8 @@ export class EditorService {
   }
 
   moveWidget(widgetId: string, targetParentId: string | null, targetPageId: string) {
+    this.saveHistory();
+    
     this.pages.update(currentPages => {
       let draggedWidget: Widget | null = null;
       const cleanedPages = currentPages.map(page => {
@@ -240,5 +245,48 @@ export class EditorService {
     }
 
     return base;
+  }
+
+  
+  private past = signal<string[]>([]);
+  private future = signal<string[]>([]);
+
+  saveHistory() {
+    const currentState = JSON.stringify(this.pages());
+    
+    this.past.update(history => [...history, currentState]);
+    
+    this.future.set([]);
+  }
+
+  undo() {
+    const pastStates = this.past();
+    if (pastStates.length === 0) return;
+
+    const previousStateStr = pastStates[pastStates.length - 1];
+    
+    const currentStateStr = JSON.stringify(this.pages());
+    this.future.update(f => [...f, currentStateStr]);
+
+    this.past.update(h => h.slice(0, -1));
+
+    this.pages.set(JSON.parse(previousStateStr));
+    
+    this.selectedWidgetId.set(null); 
+  }
+
+  redo() {
+    const futureStates = this.future();
+    if (futureStates.length === 0) return; // Rien à refaire
+
+    const nextStateStr = futureStates[futureStates.length - 1];
+    
+    const currentStateStr = JSON.stringify(this.pages());
+    this.past.update(h => [...h, currentStateStr]);
+
+    this.future.update(f => f.slice(0, -1));
+
+    this.pages.set(JSON.parse(nextStateStr));
+    this.selectedWidgetId.set(null);
   }
 }
