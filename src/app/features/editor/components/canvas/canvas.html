@@ -1,10 +1,10 @@
-<div class="viewport" (mousedown)="startDragging($event)" (contextmenu)="$event.preventDefault()">
+<div class="viewport" [class.space-mode]="spaceHeld()" [class.panning]="isPanning()" (contextmenu)="$event.preventDefault()">
 
   <div class="infinite-surface" [style.transform]="surfaceTransform()" [ngStyle]="editor.globalVariables()">
 
     @for (page of editor.pages(); track page.id) {
     <div class="page-container" [class.ds-special]="page.isDesignSystem" [style.left.px]="page.x"
-      [style.top.px]="page.y" (mousedown)="startDragging($event)">
+      [style.top.px]="page.y" [attr.data-page-id]="page.id">
 
       <div class="page-label" (mousedown)="startPageDrag($event, page)"
         [style.transform]="'scale(' + labelScale() + ')'" style="transform-origin: left bottom;"> @if
@@ -71,10 +71,28 @@
     <span class="save-status" title="Vos modifications sont enregistrées automatiquement dans ce navigateur">✓ Enregistré</span>
   </div>
 
-  <div class="canvas-ui">
-    <div class="canvas-controls">
-      Zoom: {{ (zoom() * 100).toFixed(0) }}%
+  <div class="canvas-ui" (mousedown)="$event.stopPropagation()">
+    <div class="nav-help">
+      <button class="help-btn" title="Comment se déplacer ?">?</button>
+      <div class="help-popover">
+        <strong>Se déplacer</strong>
+        <ul>
+          <li><span>Molette / 2 doigts</span> Faire défiler</li>
+          <li><span>Glisser le fond</span> Déplacer la vue</li>
+          <li><span>Espace + glisser</span> Déplacer partout</li>
+          <li><span>Ctrl + molette / pincer</span> Zoomer</li>
+          <li><span>Maj + 1</span> Tout voir</li>
+          <li><span>Maj + 2</span> Zoomer sur la sélection</li>
+          <li><span>Ctrl + 0</span> Zoom 100 %</li>
+        </ul>
+      </div>
     </div>
-    <div class="canvas-hint">Maj + glisser ou clic molette pour se déplacer</div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" (click)="zoomStep(-1)" title="Dézoomer (Ctrl + −)">−</button>
+      <button class="zoom-value" (click)="zoomTo100()" title="Revenir à 100 % (Ctrl + 0)">{{ zoomPercent() }} %</button>
+      <button class="zoom-btn" (click)="zoomStep(1)" title="Zoomer (Ctrl + +)">+</button>
+      <span class="zoom-separator"></span>
+      <button class="zoom-text-btn" (click)="zoomToFit()" title="Tout voir (Maj + 1)">Tout voir</button>
+    </div>
   </div>
 </div>
