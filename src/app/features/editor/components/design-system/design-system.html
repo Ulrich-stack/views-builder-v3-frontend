@@ -1,0 +1,204 @@
+<div class="ds">
+  <header class="ds-intro">
+    <h3>Le style de votre site</h3>
+    <p>Tout ce que vous changez ici s'applique automatiquement à toutes vos pages.</p>
+  </header>
+
+  <!-- 1. THÈMES PRÊTS À L'EMPLOI -->
+  <section class="ds-section">
+    <div class="ds-section-title">
+      <span class="step">1</span>
+      <h4>Choisissez une ambiance</h4>
+    </div>
+    <div class="theme-grid">
+      @for (t of themes; track t.name) {
+        <button class="theme-card" [class.active]="isActiveTheme(t)" (click)="applyTheme(t)">
+          <div class="theme-preview" [style.background]="t.designSystem.colors.bg"
+            [style.border-radius.px]="t.designSystem.spacing.radius / 2">
+            <span class="theme-preview-title" [style.color]="t.designSystem.colors.text"
+              [style.font-family]="t.designSystem.typography.headingFamily">Aa</span>
+            <span class="theme-preview-card" [style.background]="t.designSystem.colors.surface"
+              [style.border-radius.px]="t.designSystem.spacing.radius / 2">
+              <span class="theme-preview-line" [style.background]="t.designSystem.colors.muted"></span>
+            </span>
+            <span class="theme-preview-btn" [style.background]="t.designSystem.colors.primary"
+              [style.border-radius.px]="t.designSystem.spacing.radius / 2"></span>
+            <span class="theme-preview-dot" [style.background]="t.designSystem.colors.secondary"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">{{ t.emoji }} {{ t.name }}</span>
+            <span class="theme-desc">{{ t.description }}</span>
+          </div>
+        </button>
+      }
+    </div>
+
+    <div class="generator">
+      <p class="generator-label">… ou créez une palette à partir de <strong>votre</strong> couleur :</p>
+      <div class="generator-row">
+        <label class="seed-color" [style.background]="seedColor()" title="Choisir votre couleur">
+          <input type="color" [ngModel]="seedColor()" (ngModelChange)="seedColor.set($event)">
+        </label>
+        <div class="segmented small">
+          <button [class.active]="seedMode() === 'light'" (click)="seedMode.set('light')">☀️ Clair</button>
+          <button [class.active]="seedMode() === 'dark'" (click)="seedMode.set('dark')">🌙 Sombre</button>
+        </div>
+        <button class="btn primary" (click)="generate()">Générer</button>
+      </div>
+      <button class="btn ghost full" (click)="surprise()">🎲 Surprenez-moi !</button>
+    </div>
+  </section>
+
+  <!-- 2. COULEURS -->
+  <section class="ds-section">
+    <div class="ds-section-title">
+      <span class="step">2</span>
+      <h4>Ajustez les couleurs</h4>
+    </div>
+    <div class="color-list">
+      @for (role of colorRoles; track role.key) {
+        <label class="color-row">
+          <span class="color-chip" [style.background]="ds().colors[role.key]">
+            <input type="color" [ngModel]="ds().colors[role.key]" (ngModelChange)="setColor(role.key, $event)">
+          </span>
+          <span class="color-text">
+            <span class="color-label">{{ role.label }}</span>
+            <span class="color-hint">{{ role.hint }}</span>
+          </span>
+          <code>{{ ds().colors[role.key] }}</code>
+        </label>
+      }
+    </div>
+
+    <div class="readability" [class.has-issues]="readabilityIssues() > 0">
+      <div class="readability-header">
+        @if (readabilityIssues() === 0) {
+          <span>✅ Tout est bien lisible</span>
+        } @else {
+          <span>⚠️ {{ readabilityIssues() }} point(s) peu lisible(s)</span>
+          <button class="btn primary small" (click)="fixColors()">Corriger pour moi</button>
+        }
+      </div>
+      <ul>
+        @for (check of readability(); track check.label) {
+          <li [class.bad]="!check.ok">
+            <span>{{ check.ok ? '✓' : '✗' }} {{ check.label }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. TYPOGRAPHIE -->
+  <section class="ds-section">
+    <div class="ds-section-title">
+      <span class="step">3</span>
+      <h4>Choisissez les polices</h4>
+      <span class="current">{{ fontSummary() }}</span>
+    </div>
+    <div class="pairing-grid">
+      @for (p of pairings; track p.name) {
+        <button class="pairing-card" [class.active]="isActivePairing(p)" (click)="applyPairing(p)">
+          <span class="pairing-sample" [style.font-family]="p.heading">Aa</span>
+          <span class="pairing-name" [style.font-family]="p.body">{{ p.name }}</span>
+          <span class="pairing-desc">{{ p.description }}</span>
+        </button>
+      }
+    </div>
+
+    <button class="link" (click)="showCustomFonts.set(!showCustomFonts())">
+      {{ showCustomFonts() ? '▾' : '▸' }} Choisir mes polices une par une
+    </button>
+    @if (showCustomFonts()) {
+      <div class="custom-fonts">
+        <label>
+          <span>Titres</span>
+          <select [ngModel]="headingFont()" (ngModelChange)="setHeadingFont($event)">
+            @for (f of fonts; track f.name) {
+              <option [value]="f.css" [style.font-family]="f.css">{{ f.name }} — {{ f.category }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Texte</span>
+          <select [ngModel]="ds().typography.family" (ngModelChange)="setBodyFont($event)">
+            @for (f of fonts; track f.name) {
+              <option [value]="f.css" [style.font-family]="f.css">{{ f.name }} — {{ f.category }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    }
+
+    <span class="field-label">Taille du texte</span>
+    <div class="segmented">
+      @for (s of textSizes; track s.value) {
+        <button [class.active]="ds().typography.sizeBase === s.value" (click)="setNumber('typography.sizeBase', s.value)">
+          <span [style.font-size.px]="s.value - 2">{{ s.label }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- 4. FORMES -->
+  <section class="ds-section">
+    <div class="ds-section-title">
+      <span class="step">4</span>
+      <h4>Formes et espacements</h4>
+    </div>
+
+    <span class="field-label">Coins des boutons et des cartes</span>
+    <div class="shape-grid">
+      @for (r of radiuses; track r.value) {
+        <button class="shape" [class.active]="ds().spacing.radius === r.value" (click)="setNumber('spacing.radius', r.value)">
+          <span class="shape-sample" [style.border-radius.px]="r.value"></span>
+          {{ r.label }}
+        </button>
+      }
+    </div>
+
+    <span class="field-label">Espace à l'intérieur des blocs</span>
+    <div class="segmented">
+      @for (s of spacings; track s.value) {
+        <button [class.active]="ds().spacing.padding === s.value" (click)="setNumber('spacing.padding', s.value)">{{ s.label }}</button>
+      }
+    </div>
+  </section>
+
+  <!-- APERÇU -->
+  <section class="ds-section">
+    <div class="ds-section-title">
+      <span class="step">👀</span>
+      <h4>Aperçu</h4>
+    </div>
+    <div class="preview">
+      <div class="preview-nav">
+        <span class="preview-logo">● MonSite</span>
+        <span class="preview-links"><span>Accueil</span><span>Services</span><span>Contact</span></span>
+      </div>
+      <div class="preview-hero">
+        <span class="preview-badge">Nouveau</span>
+        <h2>Un titre qui donne envie</h2>
+        <p>Un petit paragraphe pour présenter votre activité en quelques mots simples.</p>
+        <div class="preview-buttons">
+          <span class="preview-btn">Commencer</span>
+          <span class="preview-btn secondary">En savoir plus</span>
+        </div>
+      </div>
+      <div class="preview-cards">
+        <div class="preview-card">
+          <strong>Rapide</strong>
+          <small>Texte discret pour décrire.</small>
+        </div>
+        <div class="preview-card">
+          <strong>Simple</strong>
+          <small>Texte discret pour décrire.</small>
+        </div>
+      </div>
+      <div class="preview-form">
+        <span class="preview-input">votre@email.fr</span>
+        <span class="preview-btn">S'inscrire</span>
+      </div>
+    </div>
+  </section>
+</div>

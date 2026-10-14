@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { appConfig } from './app.config';
 
 describe('App', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: appConfig.providers,
     }).compileComponents();
   });
 
@@ -14,10 +17,12 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it("affiche les trois parties de l'éditeur", async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, views-builder-v3-frontend');
+    expect(compiled.querySelector('app-toolbox')).toBeTruthy();
+    expect(compiled.querySelector('app-canvas')).toBeTruthy();
+    expect(compiled.querySelector('app-properties')).toBeTruthy();
   });
 });

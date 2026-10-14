@@ -1,19 +1,22 @@
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
-import { EditorService } from '../../../../../core/services/EditorService/editor-service';
-import { WidgetRenderer } from '../widget-renderer/widget-renderer';
-import { ToolboxItem } from '../../../../../core/data/toolbox.data';
+import { Component, computed, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { DS_PAGE_WIDTH, EditorService } from '../../../../../core/services/EditorService/editor-service';
+import { DesignSystemPanel } from '../design-system/design-system';
+import { DRAG_DATA_TYPE, WidgetRenderer } from '../widget-renderer/widget-renderer';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Page } from '../../../../../core/models/page.model';
 
 @Component({
   selector: 'app-canvas',
-  imports: [CommonModule, FormsModule, WidgetRenderer],
+  imports: [CommonModule, FormsModule, WidgetRenderer, DesignSystemPanel],
   templateUrl: './canvas.html',
   styleUrl: './canvas.css',
 })
 export class Canvas {
   editor = inject(EditorService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly dsPageWidth = DS_PAGE_WIDTH;
 
   offsetX = signal(-4000); // Pour centrer au milieu de l'écran infini
   offsetY = signal(-4000);
@@ -43,8 +46,10 @@ export class Canvas {
 
     if (oldZoom === newZoom) return;
 
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
+    // Position de la souris relative au canvas (et non à la fenêtre, à cause de la sidebar)
+    const rect = this.host.nativeElement.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
     const worldX = (mouseX - this.offsetX()) / oldZoom;
     const worldY = (mouseY - this.offsetY()) / oldZoom;
@@ -53,6 +58,59 @@ export class Canvas {
 
     this.offsetX.set(mouseX - worldX * newZoom);
     this.offsetY.set(mouseY - worldY * newZoom);
+  }
+
+  // RACCOURCIS CLAVIER
+  @HostListener('window:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement | null;
+    const isTyping = !!target && (
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable
+    );
+    if (isTyping) return;
+
+    const mod = event.ctrlKey || event.metaKey;
+    const key = event.key.toLowerCase();
+    const selected = this.editor.selectedWidgetId();
+
+    if (mod && key === 'z' && !event.shiftKey) {
+      event.preventDefault();
+      this.editor.undo();
+    } else if (mod && (key === 'y' || (key === 'z' && event.shiftKey))) {
+      event.preventDefault();
+      this.editor.redo();
+    } else if (mod && key === 'd' && selected) {
+      event.preventDefault();
+      this.editor.duplicateWidget(selected);
+    } else if ((event.key === 'Delete' || event.key === 'Backspace') && selected) {
+      event.preventDefault();
+      this.editor.removeWidget(selected);
+    } else if (event.key === 'Escape') {
+      this.editor.selectWidget(null);
+    }
+  }
+
+  // PAGES
+  addPage() {
+    const page = this.editor.addPage();
+    this.focusPage(page);
+  }
+
+  /** Centre la vue sur une page. */
+  focusPage(page: Page) {
+    const rect = this.host.nativeElement.getBoundingClientRect();
+    const width = page.width || 800;
+    this.offsetX.set(rect.width / 2 - (page.x + width / 2) * this.zoom());
+    this.offsetY.set(120 - page.y * this.zoom());
+  }
+
+  selectPage(page: Page) {
+    this.editor.selectWidget(null);
+    this.editor.selectedPageId.set(page.id);
+  }
+
+  renamePage(page: Page, name: string) {
+    this.editor.updatePage(page.id, { name }, 'rename:' + page.id);
   }
 
   startPageDrag(event: MouseEvent, page: Page) {
@@ -64,6 +122,7 @@ export class Canvas {
     const startY = event.clientY;
     const initialPageX = page.x;
     const initialPageY = page.y;
+    const gestureKey = `page-move:${page.id}:${Date.now()}`;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       // Calcul de la distance parcourue ajustée par le zoom
@@ -71,8 +130,7 @@ export class Canvas {
       const deltaY = (moveEvent.clientY - startY) / this.zoom();
 
       // Mise à jour de la position de la page
-      page.x = initialPageX + deltaX;
-      page.y = initialPageY + deltaY;
+      this.editor.updatePage(page.id, { x: initialPageX + deltaX, y: initialPageY + deltaY }, gestureKey);
     };
 
     const onMouseUp = () => {
@@ -92,14 +150,17 @@ export class Canvas {
     const startY = event.clientY;
     const startWidth = page.width || 800;
     const startHeight = page.height || 1000;
+    const gestureKey = `page-resize:${page.id}:${Date.now()}`;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       // On divise par le zoom pour que le redimensionnement soit fidèle au curseur
       const deltaX = (moveEvent.clientX - startX) / this.zoom();
       const deltaY = (moveEvent.clientY - startY) / this.zoom();
 
-      page.width = Math.max(200, startWidth + deltaX);
-      page.height = Math.max(200, startHeight + deltaY);
+      this.editor.updatePage(page.id, {
+        width: Math.max(200, startWidth + deltaX),
+        height: Math.max(200, startHeight + deltaY)
+      }, gestureKey);
     };
 
     const onMouseUp = () => {
@@ -110,6 +171,7 @@ export class Canvas {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   }
+
   startDragging(event: MouseEvent) {
     // On ne déclenche le "Pan" (déplacement canvas) QUE si :
     // - On utilise le clic milieu (molette)
@@ -138,16 +200,25 @@ export class Canvas {
     document.body.style.cursor = 'default';
   }
 
+  // GLISSER-DÉPOSER SUR LA PAGE (zone vide → ajout à la fin)
   onDragOver(event: DragEvent) {
     event.preventDefault();
+    this.editor.dropTarget.set(null);
 
     if (event.dataTransfer)
       event.dataTransfer.effectAllowed = "move";
   }
 
+  @HostListener('window:dragend')
+  @HostListener('window:drop')
+  clearDropTarget() {
+    this.editor.dropTarget.set(null);
+  }
+
   onDrop(event: DragEvent, pageId: string) {
     event.preventDefault();
-    const data = event.dataTransfer?.getData("widget-item");
+    this.editor.dropTarget.set(null);
+    const data = event.dataTransfer?.getData(DRAG_DATA_TYPE);
 
     if (data) {
       const draggedData = JSON.parse(data);
@@ -161,6 +232,7 @@ export class Canvas {
       else {
         const newWidget = this.editor.createWidgetFromToolboxItem(draggedData);
         this.editor.addWidget(newWidget, null, pageId);
+        this.editor.selectWidget(newWidget.id);
       }
     }
   }

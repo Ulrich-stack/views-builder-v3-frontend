@@ -1,52 +1,75 @@
-<div 
+<div
   [id]="widget().id"
   [ngStyle]="widget().styles"
   [class.selected]="editor.selectedWidgetId() === widget().id"
-  [class.is-container]="widget().children" 
+  [class.editing]="editing()"
+  [class.is-container]="widget().children"
+  [class.drop-before]="dropPosition() === 'before'"
+  [class.drop-after]="dropPosition() === 'after'"
+  [class.drop-inside]="dropPosition() === 'inside'"
+  [attr.draggable]="!editing()"
+  [attr.title]="isEditable() && !editing() ? 'Double-cliquez pour modifier le texte' : null"
   (dragstart)="onDragStart($event)"
+  (dragend)="onDragEnd()"
   (dragover)="onDragOver($event)"
   (drop)="onDrop($event)"
   (click)="selectWidget($event)"
+  (dblclick)="startEditing($event)"
   class="widget-wrapper"
-  draggable="true"
 >
 @switch (widget().type) {
-  
+
   @case ('container') {
     <div class="container-inner">
       @for (child of widget().children; track child.id) {
         <app-widget-renderer [widget]="child" [pageId]="pageId()"></app-widget-renderer>
+      } @empty {
+        <div class="empty-container">Glissez des blocs ici</div>
       }
     </div>
   }
 
   @case ('text') {
     @switch (widget().element) {
-      @case ('h1') { <h1>{{ widget().content }}</h1> }
-      @case ('h2') { <h2>{{ widget().content }}</h2> }
-      @case ('a') { <a href="javascript:void(0)">{{ widget().content }}</a> }
-      @default { <p>{{ widget().content }}</p> }
+      @case ('h1') { <h1 data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></h1> }
+      @case ('h2') { <h2 data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></h2> }
+      @case ('span') { <span data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></span> }
+      @case ('a') { <a data-editable href="javascript:void(0)" [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></a> }
+      @default { <p data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></p> }
     }
   }
 
   @case ('action') {
-    <button class="btn-render">{{ widget().content }}</button>
+    <div class="btn-render" data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></div>
   }
 
   @case ('input') {
     @switch (widget().element) {
-      @case ('textarea') { <textarea [placeholder]="widget().name"></textarea> }
-      @case ('checkbox') { <input type="checkbox"> }
-      @default { <input type="text" [placeholder]="widget().name"> }
+      @case ('textarea') { <textarea [placeholder]="widget().config['placeholder'] ?? widget().name" tabindex="-1"></textarea> }
+      @case ('checkbox') {
+        <label class="checkbox-render"><input type="checkbox" tabindex="-1"> {{ widget().config['label'] ?? '' }}</label>
+      }
+      @default { <input type="text" [placeholder]="widget().config['placeholder'] ?? widget().name" tabindex="-1"> }
     }
   }
 
   @case ('media') {
-    @if (widget().element === 'img') {
-      <img [src]="widget().config['src'] || 'https://via.placeholder.com/150'">
-    }
-    @if (widget().element === 'lucide-icon') {
-      <div class="icon-placeholder">◈</div>
+    @switch (widget().element) {
+      @case ('img') {
+        @if (widget().config['src']) {
+          <img [src]="widget().config['src']" [alt]="widget().config['alt'] ?? ''" draggable="false">
+        } @else {
+          <div class="media-placeholder">🖼️ Ajoutez une image dans le panneau de droite</div>
+        }
+      }
+      @case ('video') {
+        @if (widget().config['src']) {
+          <video [src]="widget().config['src']" controls></video>
+        } @else {
+          <div class="media-placeholder">🎬 Ajoutez une vidéo dans le panneau de droite</div>
+        }
+      }
+      @default { <div class="icon-placeholder">◈</div> }
     }
   }
 }

@@ -11,8 +11,8 @@
         (page.isDesignSystem) {
         <span class="ds-title">{{ page.name }}</span>
         } @else {
-        <input class="page-name-input" [(ngModel)]="page.name" (mousedown)="$event.stopPropagation()"
-          spellcheck="false">
+        <input class="page-name-input" [ngModel]="page.name" (ngModelChange)="renamePage(page, $event)"
+          (mousedown)="$event.stopPropagation()" (keydown.enter)="$any($event.target).blur()" spellcheck="false">
 
         @if (page.width || page.height) {
         <span class="dimension-badge">
@@ -32,8 +32,9 @@
         }
       </div>
 
-      <div class="page-paper" (mousedown)="$event.stopPropagation()"
-        [style.width.px]="page.width || (page.isDesignSystem ? 420 : 800)"
+      <div class="page-paper" (mousedown)="$event.stopPropagation()" (click)="selectPage(page)"
+        [class.selected-page]="!page.isDesignSystem && editor.selectedPageId() === page.id && !editor.selectedWidgetId()"
+        [style.width.px]="page.width || (page.isDesignSystem ? dsPageWidth : 800)"
         [style.min-height.px]="page.height || (page.isDesignSystem ? null : 1000)" (dragover)="onDragOver($event)"
         (drop)="onDrop($event, page.id)">
 
@@ -43,127 +44,37 @@
 
         @for (w of page.widgets; track w.id) {
         <app-widget-renderer [widget]="w" [pageId]="page.id" />
+        } @empty {
+        <div class="empty-page">
+          <span class="empty-page-icon">✨</span>
+          <p>Votre page est vide</p>
+          <small>Glissez un bloc depuis la colonne de gauche pour commencer.<br>
+            Astuce : les « Blueprints Modernes » sont des sections toutes prêtes.</small>
+        </div>
         }
         }
 
         @else {
-        <div class="ds-controls">
-          <section class="ds-group">
-            <div class="ds-group-header">
-              <h4>Couleurs</h4>
-            </div>
-
-            <div class="ds-color-grid">
-              <div class="ds-color-card">
-                <div class="ds-color-input-wrapper">
-                  <input type="color" [ngModel]="editor.designSystem().colors.primary"
-                    (ngModelChange)="editor.updateTheme('colors.primary', $event)">
-                </div>
-                <div class="ds-color-info">
-                  <label>Primaire</label>
-                  <code>{{ editor.designSystem().colors.primary }}</code>
-                </div>
-              </div>
-
-              <div class="ds-color-card">
-                <div class="ds-color-input-wrapper">
-                  <input type="color" [ngModel]="editor.designSystem().colors.secondary"
-                    (ngModelChange)="editor.updateTheme('colors.secondary', $event)">
-                </div>
-                <div class="ds-color-info">
-                  <label>Accent</label>
-                  <code>{{ editor.designSystem().colors.secondary }}</code>
-                </div>
-              </div>
-
-              <div class="ds-color-card">
-                <div class="ds-color-input-wrapper">
-                  <input type="color" [ngModel]="editor.designSystem().colors.text"
-                    (ngModelChange)="editor.updateTheme('colors.text', $event)">
-                </div>
-                <div class="ds-color-info">
-                  <label>Texte</label>
-                  <code>{{ editor.designSystem().colors.text }}</code>
-                </div>
-              </div>
-
-              <div class="ds-color-card">
-                <div class="ds-color-input-wrapper">
-                  <input type="color" [ngModel]="editor.designSystem().colors.bg"
-                    (ngModelChange)="editor.updateTheme('colors.bg', $event)">
-                </div>
-                <div class="ds-color-info">
-                  <label>Fond</label>
-                  <code>{{ editor.designSystem().colors.bg }}</code>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div class="ds-split-row">
-            <section class="ds-group">
-              <h4>Typographie</h4>
-              <div class="ds-control">
-                <select [ngModel]="editor.designSystem().typography.family"
-                  (ngModelChange)="editor.updateTheme('typography.family', $event)">
-                  <option value="'Inter', sans-serif">Inter</option>
-                  <option value="'Playfair Display', serif">Playfair</option>
-                  <option value="'Courier New', monospace">Mono</option>
-                </select>
-              </div>
-              <div class="ds-control">
-                <div class="ds-label-row">
-                  <label>Base</label>
-                  <span>{{editor.designSystem().typography.sizeBase}}px</span>
-                </div>
-                <input type="range" min="12" max="24" [ngModel]="editor.designSystem().typography.sizeBase"
-                  (ngModelChange)="editor.updateTheme('typography.sizeBase', $event)">
-              </div>
-            </section>
-
-            <section class="ds-group">
-              <h4>Structure</h4>
-              <div class="ds-control">
-                <div class="ds-label-row">
-                  <label>Radius</label>
-                  <span>{{editor.designSystem().spacing.radius}}px</span>
-                </div>
-                <input type="range" min="0" max="40" [ngModel]="editor.designSystem().spacing.radius"
-                  (ngModelChange)="editor.updateTheme('spacing.radius', $event)">
-              </div>
-              <div class="ds-control">
-                <div class="ds-label-row">
-                  <label>Padding</label>
-                  <span>{{editor.designSystem().spacing.padding}}px</span>
-                </div>
-                <input type="range" min="0" max="50" [ngModel]="editor.designSystem().spacing.padding"
-                  (ngModelChange)="editor.updateTheme('spacing.padding', $event)">
-              </div>
-            </section>
-          </div>
-
-          <div class="ds-preview-card">
-            <div class="ds-preview-header">
-              <span class="dot"></span> Composant Preview
-            </div>
-            <div class="ds-preview-content">
-              <p>Aperçu du rendu final</p>
-              <div class="ds-button-group">
-                <button class="preview-btn">Primaire</button>
-                <button class="preview-btn secondary">Accent</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <app-design-system />
         }
       </div>
     </div>
     }
   </div>
 
+  <div class="canvas-toolbar" (mousedown)="$event.stopPropagation()">
+    <button class="toolbar-btn primary" (click)="addPage()" title="Ajouter une page">＋ Nouvelle page</button>
+    <span class="toolbar-separator"></span>
+    <button class="toolbar-btn" (click)="editor.undo()" [disabled]="!editor.canUndo()" title="Annuler (Ctrl+Z)">↶ Annuler</button>
+    <button class="toolbar-btn" (click)="editor.redo()" [disabled]="!editor.canRedo()" title="Rétablir (Ctrl+Y)">↷ Rétablir</button>
+    <span class="toolbar-separator"></span>
+    <span class="save-status" title="Vos modifications sont enregistrées automatiquement dans ce navigateur">✓ Enregistré</span>
+  </div>
+
   <div class="canvas-ui">
     <div class="canvas-controls">
       Zoom: {{ (zoom() * 100).toFixed(0) }}%
     </div>
+    <div class="canvas-hint">Maj + glisser ou clic molette pour se déplacer</div>
   </div>
 </div>

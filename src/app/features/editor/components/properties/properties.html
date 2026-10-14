@@ -1,1 +1,231 @@
-<p>properties works!</p>
+<div class="properties-container">
+  <header class="properties-header">
+    <h3>Propriétés</h3>
+  </header>
+
+  <div class="properties-body">
+    @if (widget(); as w) {
+      <!-- EN-TÊTE DU BLOC SÉLECTIONNÉ -->
+      <div class="selection-card">
+        <div class="selection-title">
+          <span class="type-badge">{{ typeLabel() }}</span>
+          <span class="selection-name">{{ w.name }}</span>
+        </div>
+        <div class="action-row">
+          <button class="icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">↑</button>
+          <button class="icon-btn" (click)="moveBy(w, 1)" [disabled]="!canMoveBy(w, 1)" title="Descendre">↓</button>
+          <button class="icon-btn" (click)="editor.duplicateWidget(w.id)" title="Dupliquer (Ctrl+D)">⧉</button>
+          <button class="icon-btn danger" (click)="editor.removeWidget(w.id)" title="Supprimer (Suppr)">🗑</button>
+        </div>
+        @if (hasParent()) {
+          <button class="link-btn" (click)="editor.selectParent()">↖ Sélectionner le bloc qui le contient</button>
+        }
+      </div>
+
+      <!-- CONTENU -->
+      @if (hasText()) {
+        <section class="group">
+          <h4>Texte</h4>
+          <textarea class="field" rows="3" [ngModel]="w.content" (ngModelChange)="setContent($event)"></textarea>
+          <p class="hint">Astuce : double-cliquez sur le texte dans la page pour l'écrire directement.</p>
+          @if (w.element === 'a') {
+            <label class="field-label">Adresse du lien</label>
+            <input class="field" type="url" placeholder="https://..." [ngModel]="config('href')" (ngModelChange)="setConfig('href', $event)">
+          }
+        </section>
+      }
+
+      @if (w.element === 'img' || w.element === 'video') {
+        <section class="group">
+          <h4>{{ w.element === 'img' ? 'Image' : 'Vidéo' }}</h4>
+          <label class="field-label">Adresse web (URL)</label>
+          <input class="field" type="url" placeholder="https://..." [ngModel]="config('src')" (ngModelChange)="setConfig('src', $event)">
+          @if (w.element === 'img') {
+            <button class="secondary-btn" (click)="useSampleImage()">🎲 Image d'exemple</button>
+            <label class="field-label">Description (pour l'accessibilité)</label>
+            <input class="field" type="text" placeholder="Ex : Photo de l'équipe" [ngModel]="config('alt')" (ngModelChange)="setConfig('alt', $event)">
+          }
+        </section>
+      }
+
+      @if (w.type === 'input') {
+        <section class="group">
+          <h4>Champ</h4>
+          @if (w.element === 'checkbox') {
+            <label class="field-label">Texte à côté de la case</label>
+            <input class="field" type="text" [ngModel]="config('label')" (ngModelChange)="setConfig('label', $event)">
+          } @else {
+            <label class="field-label">Texte d'exemple dans le champ</label>
+            <input class="field" type="text" [ngModel]="config('placeholder') || w.name" (ngModelChange)="setConfig('placeholder', $event)">
+          }
+        </section>
+      }
+
+      <!-- DISPOSITION (CONTENEURS) -->
+      @if (isContainer()) {
+        <section class="group">
+          <h4>Disposition des éléments</h4>
+          <div class="choice-grid cols-2">
+            <button class="choice" [class.active]="layout() === 'column'" (click)="setLayout('column')">⬇ Les uns sous les autres</button>
+            <button class="choice" [class.active]="layout() === 'row'" (click)="setLayout('row')">➡ Côte à côte</button>
+            <button class="choice" [class.active]="layout() === 'grid'" (click)="setLayout('grid')">▦ En grille</button>
+            <button class="choice" [class.active]="layout() === 'free'" (click)="setLayout('free')">◻ Simple</button>
+          </div>
+
+          @if (layout() === 'grid') {
+            <label class="field-label">Nombre de colonnes</label>
+            <div class="segmented">
+              @for (n of [1, 2, 3, 4]; track n) {
+                <button [class.active]="gridColumns() === n" (click)="setGridColumns(n)">{{ n }}</button>
+              }
+            </div>
+          }
+
+          @if (layout() !== 'free') {
+            <label class="field-label">Espace entre les éléments</label>
+            <div class="segmented">
+              @for (p of gaps; track p.label) {
+                <button [class.active]="isActive('gap', p.value)" (click)="setStyle('gap', p.value)">{{ p.label }}</button>
+              }
+            </div>
+          }
+
+          @if (layout() === 'column' || layout() === 'row') {
+            <label class="field-label">Alignement</label>
+            <div class="segmented">
+              @for (p of alignItems; track p.label) {
+                <button [class.active]="isActive('align-items', p.value)" (click)="setStyle('align-items', p.value)">{{ p.label }}</button>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- APPARENCE DU TEXTE -->
+      @if (hasText()) {
+        <section class="group">
+          <h4>Style du texte</h4>
+
+          <label class="field-label">Taille</label>
+          <div class="segmented">
+            @for (p of fontSizes; track p.label) {
+              <button [class.active]="isActive('font-size', p.value)" [title]="p.hint" (click)="setStyle('font-size', p.value)">{{ p.label }}</button>
+            }
+          </div>
+
+          <div class="split">
+            <div>
+              <label class="field-label">Épaisseur</label>
+              <div class="segmented">
+                @for (p of fontWeights; track p.label) {
+                  <button [class.active]="isActive('font-weight', p.value)" (click)="setStyle('font-weight', p.value)">{{ p.label }}</button>
+                }
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Alignement</label>
+              <div class="segmented">
+                @for (p of textAligns; track p.label) {
+                  <button [class.active]="isActive('text-align', p.value)" [title]="p.hint" (click)="setStyle('text-align', p.value)">{{ p.label }}</button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <label class="field-label">Couleur</label>
+          <div class="swatches">
+            @for (s of textColors; track s.label) {
+              <button class="swatch" [class.active]="isActive('color', s.value)" [title]="s.label"
+                [style.background]="swatchColor(s)" (click)="setStyle('color', s.value)"></button>
+            }
+            <label class="swatch custom" [class.active]="isCustomColor('color', textColors)" title="Couleur personnalisée">
+              <input type="color" [ngModel]="customColor('color')" (ngModelChange)="setStyle('color', $event)">
+            </label>
+          </div>
+        </section>
+      }
+
+      <!-- APPARENCE DU BLOC -->
+      <section class="group">
+        <h4>Apparence</h4>
+
+        <label class="field-label">Fond</label>
+        <div class="swatches">
+          @for (s of backgrounds; track s.label) {
+            <button class="swatch" [class.none]="!s.value" [class.active]="isActive('background-color', s.value)" [title]="s.label"
+              [style.background]="swatchColor(s)" (click)="setStyle('background-color', s.value)"></button>
+          }
+          <label class="swatch custom" [class.active]="isCustomColor('background-color', backgrounds)" title="Couleur personnalisée">
+            <input type="color" [ngModel]="customColor('background-color')" (ngModelChange)="setStyle('background-color', $event)">
+          </label>
+        </div>
+
+        <label class="field-label">Marge intérieure</label>
+        <div class="segmented">
+          @for (p of paddings; track p.label) {
+            <button [class.active]="isActive('padding', p.value)" (click)="setStyle('padding', p.value)">{{ p.label }}</button>
+          }
+        </div>
+
+        <label class="field-label">Coins</label>
+        <div class="segmented">
+          @for (p of radiuses; track p.label) {
+            <button [class.active]="isActive('border-radius', p.value)" (click)="setStyle('border-radius', p.value)">{{ p.label }}</button>
+          }
+        </div>
+
+        <label class="field-label">Bordure</label>
+        <div class="segmented">
+          @for (p of borders; track p.label) {
+            <button [class.active]="isActive('border', p.value)" (click)="setStyle('border', p.value)">{{ p.label }}</button>
+          }
+        </div>
+
+        <label class="field-label">Largeur</label>
+        <div class="segmented">
+          @for (p of widths; track p.label) {
+            <button [class.active]="isActive('width', p.value)" (click)="setStyle('width', p.value)">{{ p.label }}</button>
+          }
+        </div>
+      </section>
+    } @else if (page(); as p) {
+      <!-- PAGE SÉLECTIONNÉE -->
+      <section class="group">
+        <h4>Page</h4>
+        <label class="field-label">Nom de la page</label>
+        <input class="field" type="text" [ngModel]="p.name" (ngModelChange)="renamePage($event)">
+
+        <label class="field-label">Taille d'écran</label>
+        <div class="segmented">
+          @for (w of pageWidths; track w.label) {
+            <button [class.active]="isPageWidth(w.value)" (click)="setPageWidth(w.value)">{{ w.label }}</button>
+          }
+        </div>
+
+        <p class="hint">{{ p.widgets.length }} bloc(s) sur cette page. Cliquez sur un bloc pour le modifier.</p>
+        <button class="secondary-btn danger" (click)="deletePage()">🗑 Supprimer la page</button>
+      </section>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">👆</span>
+        <p>Cliquez sur un élément de la page pour le modifier ici.</p>
+      </div>
+    }
+
+    <!-- AIDE -->
+    <section class="group help">
+      <h4>Raccourcis</h4>
+      <ul class="shortcuts">
+        <li><kbd>Double-clic</kbd> Modifier un texte</li>
+        <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> Annuler</li>
+        <li><kbd>Ctrl</kbd>+<kbd>Y</kbd> Rétablir</li>
+        <li><kbd>Ctrl</kbd>+<kbd>D</kbd> Dupliquer</li>
+        <li><kbd>Suppr</kbd> Supprimer le bloc</li>
+        <li><kbd>Échap</kbd> Désélectionner</li>
+      </ul>
+      @if (!widget()) {
+        <button class="link-btn muted" (click)="resetProject()">Repartir d'un projet vierge</button>
+      }
+    </section>
+  </div>
+</div>

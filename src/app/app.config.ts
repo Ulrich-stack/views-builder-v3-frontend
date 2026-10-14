@@ -12,7 +12,8 @@ import {
   TextCursorInput,
   FileText,
   ListOrdered,
-  CheckSquare
+  CheckSquare,
+  MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers
 } from 'lucide-angular';
 
 const myIcons = {}
@@ -23,7 +24,8 @@ export const appConfig: ApplicationConfig = {
       LucideAngularModule.pick({
         LayoutTemplate, Box, Columns2, Menu, Type, AlignLeft,
         ImageIcon, Smile, MousePointer2, PlusSquare,
-        Search, Trash2, Settings, Heading1, Heading2, Link, Image, Video, TextCursorInput, FileText, ListOrdered, CheckSquare
+        Search, Trash2, Settings, Heading1, Heading2, Link, Image, Video, TextCursorInput, FileText, ListOrdered, CheckSquare,
+        MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers
       })
     ),
     provideBrowserGlobalErrorListeners(),

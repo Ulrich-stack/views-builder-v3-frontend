@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Toolbox } from './toolbox';
+import { appConfig } from '../../../../app.config';
 
 describe('Toolbox', () => {
   let component: Toolbox;
@@ -8,7 +9,8 @@ describe('Toolbox', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Toolbox]
+      imports: [Toolbox],
+      providers: appConfig.providers,
     })
     .compileComponents();
 

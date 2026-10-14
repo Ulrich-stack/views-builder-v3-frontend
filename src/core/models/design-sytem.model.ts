@@ -8,7 +8,8 @@ export interface DesignSystem {
     muted: string;
   };
   typography: {
-    family: string;
+    family: string; // police du texte courant
+    headingFamily?: string; // police des titres (par défaut : celle du texte)
     sizeBase: number; // en pixels
   };
   spacing: {
