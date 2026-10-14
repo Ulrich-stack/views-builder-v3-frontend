@@ -105,6 +105,45 @@ describe('EditorService', () => {
     });
   });
 
+  describe('ajout au clic', () => {
+    const item = { type: 'text', label: 'Paragraphe', icon: '', element: 'p' } as const;
+
+    it("ajoute à la fin de la page quand rien n'est sélectionné", () => {
+      service.addWidget(text('a'), null, 'page-1');
+      service.selectWidget(null);
+      const added = service.addFromToolbox(item)!;
+      expect(rootIds()).toEqual(['a', added.id]);
+      expect(service.selectedWidgetId()).toBe(added.id);
+    });
+
+    it('ajoute dans le conteneur sélectionné', () => {
+      service.addWidget(container('box'), null, 'page-1');
+      service.selectWidget('box');
+      const added = service.addFromToolbox(item)!;
+      expect(service.getParentId(added.id)).toBe('box');
+    });
+
+    it('ajoute juste après le bloc sélectionné', () => {
+      ['a', 'b'].forEach(id => service.addWidget(text(id), null, 'page-1'));
+      service.selectWidget('a');
+      const added = service.addFromToolbox(item)!;
+      expect(rootIds()).toEqual(['a', added.id, 'b']);
+    });
+
+    it("donne le chemin du bloc (fil d'Ariane)", () => {
+      service.addWidget(container('outer', [container('inner', [text('t')])]), null, 'page-1');
+      expect(service.getPath('t').map(w => w.id)).toEqual(['outer', 'inner', 't']);
+    });
+
+    it('remet le style par défaut', () => {
+      service.addWidget(text('t'), null, 'page-1');
+      service.setWidgetStyle('t', 'color', 'red');
+      service.resetWidgetStyles('t');
+      service.selectWidget('t');
+      expect(service.selectedWidget()!.styles['color']).toBe('var(--text)');
+    });
+  });
+
   describe('historique', () => {
     it('annule et rétablit', () => {
       service.addWidget(text('a'), null, 'page-1');

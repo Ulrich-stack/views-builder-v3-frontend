@@ -1,0 +1,48 @@
+<div class="layers" (mouseleave)="hover(null)">
+  <p class="layers-hint">Tous les blocs de vos pages. Cliquez pour sélectionner, survolez pour les repérer.</p>
+
+  @for (page of pages(); track page.id) {
+    <div class="page-node">
+      <button class="page-row" [class.active]="editor.selectedPageId() === page.id && !editor.selectedWidgetId()"
+        (click)="selectPage(page)">
+        <lucide-angular name="file-text" class="node-icon"></lucide-angular>
+        <span class="page-name">{{ page.name }}</span>
+        <span class="count">{{ page.widgets.length }}</span>
+      </button>
+
+      @if (page.widgets.length) {
+        <ng-container [ngTemplateOutlet]="tree" [ngTemplateOutletContext]="{ $implicit: page.widgets, depth: 1 }"></ng-container>
+      } @else {
+        <p class="empty">Page vide</p>
+      }
+    </div>
+  } @empty {
+    <p class="empty">Aucune page pour l'instant.</p>
+  }
+</div>
+
+<ng-template #tree let-widgets let-depth="depth">
+  @for (w of widgets; track w.id) {
+    <div class="node-row" [class.selected]="editor.selectedWidgetId() === w.id"
+      [style.padding-left.px]="depth * 14" (click)="select(w)" (mouseenter)="hover(w)">
+      @if (w.children?.length) {
+        <button class="toggle" (click)="toggle($event, w.id)" [title]="isOpen(w.id) ? 'Replier' : 'Déplier'">
+          <lucide-angular [name]="isOpen(w.id) ? 'chevron-down' : 'chevron-right'" class="chevron"></lucide-angular>
+        </button>
+      } @else {
+        <span class="toggle-spacer"></span>
+      }
+      <lucide-angular [name]="icon(w)" class="node-icon"></lucide-angular>
+      <span class="node-name">{{ w.name }}</span>
+      @if (preview(w); as text) {
+        <span class="node-preview">{{ text }}</span>
+      }
+      <button class="node-delete" (click)="remove($event, w)" title="Supprimer">
+        <lucide-angular name="trash-2" class="delete-icon"></lucide-angular>
+      </button>
+    </div>
+    @if (w.children?.length && isOpen(w.id)) {
+      <ng-container [ngTemplateOutlet]="tree" [ngTemplateOutletContext]="{ $implicit: w.children, depth: depth + 1 }"></ng-container>
+    }
+  }
+</ng-template>

@@ -147,3 +147,16 @@ h1, h2, p, span, a {
 h1, h2 {
   font-family: var(--font-family-heading, inherit);
 }
+
+/* Une image remplit son cadre (utile pour les galeries carrées) */
+.widget-wrapper > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Bloc survolé depuis le panneau Calques */
+.widget-wrapper.hovered:not(.selected) {
+  outline: 2px dashed var(--primary);
+  outline-offset: -2px;
+}

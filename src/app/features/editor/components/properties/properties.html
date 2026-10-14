@@ -1,3 +1,11 @@
+<ng-template #presetRow let-presets let-prop="prop">
+  <div class="segmented">
+    @for (p of presets; track p.label) {
+      <button [class.active]="isActive(prop, p.value)" [title]="p.hint ?? p.label" (click)="setStyle(prop, p.value)">{{ p.label }}</button>
+    }
+  </div>
+</ng-template>
+
 <div class="properties-container">
   <header class="properties-header">
     <h3>Propriétés</h3>
@@ -7,56 +15,84 @@
     @if (widget(); as w) {
       <!-- EN-TÊTE DU BLOC SÉLECTIONNÉ -->
       <div class="selection-card">
+        <nav class="breadcrumb" aria-label="Emplacement du bloc">
+          <button class="crumb" (click)="editor.selectWidget(null)">{{ pageName() }}</button>
+          @for (p of path(); track p.id; let last = $last) {
+            <span class="crumb-sep">›</span>
+            @if (last) {
+              <span class="crumb current">{{ p.name }}</span>
+            } @else {
+              <button class="crumb" (click)="editor.selectWidget(p.id)">{{ p.name }}</button>
+            }
+          }
+        </nav>
+
         <div class="selection-title">
-          <span class="type-badge">{{ typeLabel() }}</span>
-          <span class="selection-name">{{ w.name }}</span>
+          <span class="type-icon"><lucide-angular [name]="typeIcon()" class="icon"></lucide-angular></span>
+          <div class="title-text">
+            <input class="name-input" [ngModel]="w.name" (ngModelChange)="rename($event)" spellcheck="false"
+              title="Renommer le bloc (visible dans les calques)">
+            <span class="type-label">{{ typeLabel() }}</span>
+          </div>
         </div>
+
         <div class="action-row">
-          <button class="icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">↑</button>
-          <button class="icon-btn" (click)="moveBy(w, 1)" [disabled]="!canMoveBy(w, 1)" title="Descendre">↓</button>
-          <button class="icon-btn" (click)="editor.duplicateWidget(w.id)" title="Dupliquer (Ctrl+D)">⧉</button>
-          <button class="icon-btn danger" (click)="editor.removeWidget(w.id)" title="Supprimer (Suppr)">🗑</button>
+          <button class="icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">
+            <lucide-angular name="arrow-up" class="icon"></lucide-angular>
+          </button>
+          <button class="icon-btn" (click)="moveBy(w, 1)" [disabled]="!canMoveBy(w, 1)" title="Descendre">
+            <lucide-angular name="arrow-down" class="icon"></lucide-angular>
+          </button>
+          <button class="icon-btn" (click)="editor.duplicateWidget(w.id)" title="Dupliquer (Ctrl+D)">
+            <lucide-angular name="copy" class="icon"></lucide-angular>
+          </button>
+          <button class="icon-btn danger" (click)="editor.removeWidget(w.id)" title="Supprimer (Suppr)">
+            <lucide-angular name="trash-2" class="icon"></lucide-angular>
+          </button>
         </div>
-        @if (hasParent()) {
-          <button class="link-btn" (click)="editor.selectParent()">↖ Sélectionner le bloc qui le contient</button>
-        }
       </div>
 
       <!-- CONTENU -->
-      @if (hasText()) {
+      @if (hasText() || w.type === 'media' || w.type === 'input') {
         <section class="group">
-          <h4>Texte</h4>
-          <textarea class="field" rows="3" [ngModel]="w.content" (ngModelChange)="setContent($event)"></textarea>
-          <p class="hint">Astuce : double-cliquez sur le texte dans la page pour l'écrire directement.</p>
-          @if (w.element === 'a') {
-            <label class="field-label">Adresse du lien</label>
-            <input class="field" type="url" placeholder="https://..." [ngModel]="config('href')" (ngModelChange)="setConfig('href', $event)">
-          }
-        </section>
-      }
+          <button class="group-header" (click)="toggleSection('content')">
+            <lucide-angular name="pencil" class="group-icon"></lucide-angular>
+            <span>Contenu</span>
+            <lucide-angular [name]="isOpen('content') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+          </button>
+          @if (isOpen('content')) {
+            <div class="group-body">
+              @if (hasText()) {
+                <textarea class="field" rows="3" [ngModel]="w.content" (ngModelChange)="setContent($event)"></textarea>
+                <p class="hint">💡 Vous pouvez aussi double-cliquer sur le texte dans la page.</p>
+                @if (w.element === 'a' || w.type === 'action') {
+                  <label class="field-label">Lien (quand on clique)</label>
+                  <input class="field" type="url" placeholder="https://..." [ngModel]="config('href')" (ngModelChange)="setConfig('href', $event)">
+                }
+              }
 
-      @if (w.element === 'img' || w.element === 'video') {
-        <section class="group">
-          <h4>{{ w.element === 'img' ? 'Image' : 'Vidéo' }}</h4>
-          <label class="field-label">Adresse web (URL)</label>
-          <input class="field" type="url" placeholder="https://..." [ngModel]="config('src')" (ngModelChange)="setConfig('src', $event)">
-          @if (w.element === 'img') {
-            <button class="secondary-btn" (click)="useSampleImage()">🎲 Image d'exemple</button>
-            <label class="field-label">Description (pour l'accessibilité)</label>
-            <input class="field" type="text" placeholder="Ex : Photo de l'équipe" [ngModel]="config('alt')" (ngModelChange)="setConfig('alt', $event)">
-          }
-        </section>
-      }
+              @if (w.element === 'img' || w.element === 'video') {
+                <label class="field-label">Adresse web (URL)</label>
+                <input class="field" type="url" placeholder="https://..." [ngModel]="config('src')" (ngModelChange)="setConfig('src', $event)">
+                @if (w.element === 'img') {
+                  <button class="secondary-btn" (click)="useSampleImage()">🎲 Image d'exemple</button>
+                  <label class="field-label">Description (pour l'accessibilité)</label>
+                  <input class="field" type="text" placeholder="Ex : Photo de l'équipe" [ngModel]="config('alt')" (ngModelChange)="setConfig('alt', $event)">
+                  <label class="field-label">Hauteur</label>
+                  <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: imageHeights, prop: 'height' }"></ng-container>
+                }
+              }
 
-      @if (w.type === 'input') {
-        <section class="group">
-          <h4>Champ</h4>
-          @if (w.element === 'checkbox') {
-            <label class="field-label">Texte à côté de la case</label>
-            <input class="field" type="text" [ngModel]="config('label')" (ngModelChange)="setConfig('label', $event)">
-          } @else {
-            <label class="field-label">Texte d'exemple dans le champ</label>
-            <input class="field" type="text" [ngModel]="config('placeholder') || w.name" (ngModelChange)="setConfig('placeholder', $event)">
+              @if (w.type === 'input') {
+                @if (w.element === 'checkbox') {
+                  <label class="field-label">Texte à côté de la case</label>
+                  <input class="field" type="text" [ngModel]="config('label')" (ngModelChange)="setConfig('label', $event)">
+                } @else {
+                  <label class="field-label">Texte d'exemple dans le champ</label>
+                  <input class="field" type="text" [ngModel]="config('placeholder') || w.name" (ngModelChange)="setConfig('placeholder', $event)">
+                }
+              }
+            </div>
           }
         </section>
       }
@@ -64,157 +100,223 @@
       <!-- DISPOSITION (CONTENEURS) -->
       @if (isContainer()) {
         <section class="group">
-          <h4>Disposition des éléments</h4>
-          <div class="choice-grid cols-2">
-            <button class="choice" [class.active]="layout() === 'column'" (click)="setLayout('column')">⬇ Les uns sous les autres</button>
-            <button class="choice" [class.active]="layout() === 'row'" (click)="setLayout('row')">➡ Côte à côte</button>
-            <button class="choice" [class.active]="layout() === 'grid'" (click)="setLayout('grid')">▦ En grille</button>
-            <button class="choice" [class.active]="layout() === 'free'" (click)="setLayout('free')">◻ Simple</button>
-          </div>
+          <button class="group-header" (click)="toggleSection('layout')">
+            <lucide-angular name="layout-grid" class="group-icon"></lucide-angular>
+            <span>Disposition des éléments</span>
+            <lucide-angular [name]="isOpen('layout') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+          </button>
+          @if (isOpen('layout')) {
+            <div class="group-body">
+              <div class="choice-grid">
+                <button class="choice" [class.active]="layout() === 'column'" (click)="setLayout('column')">
+                  <span class="choice-visual col"><i></i><i></i><i></i></span>Les uns sous les autres
+                </button>
+                <button class="choice" [class.active]="layout() === 'row'" (click)="setLayout('row')">
+                  <span class="choice-visual row"><i></i><i></i><i></i></span>Côte à côte
+                </button>
+                <button class="choice" [class.active]="layout() === 'grid'" (click)="setLayout('grid')">
+                  <span class="choice-visual grid"><i></i><i></i><i></i><i></i></span>En grille
+                </button>
+                <button class="choice" [class.active]="layout() === 'free'" (click)="setLayout('free')">
+                  <span class="choice-visual free"><i></i><i></i></span>Simple
+                </button>
+              </div>
 
-          @if (layout() === 'grid') {
-            <label class="field-label">Nombre de colonnes</label>
-            <div class="segmented">
-              @for (n of [1, 2, 3, 4]; track n) {
-                <button [class.active]="gridColumns() === n" (click)="setGridColumns(n)">{{ n }}</button>
+              @if (layout() === 'grid') {
+                <label class="field-label">Nombre de colonnes</label>
+                <div class="segmented">
+                  @for (n of [1, 2, 3, 4]; track n) {
+                    <button [class.active]="gridColumns() === n" (click)="setGridColumns(n)">{{ n }}</button>
+                  }
+                </div>
               }
-            </div>
-          }
 
-          @if (layout() !== 'free') {
-            <label class="field-label">Espace entre les éléments</label>
-            <div class="segmented">
-              @for (p of gaps; track p.label) {
-                <button [class.active]="isActive('gap', p.value)" (click)="setStyle('gap', p.value)">{{ p.label }}</button>
+              @if (layout() !== 'free') {
+                <label class="field-label">Espace entre les éléments</label>
+                <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: gaps, prop: 'gap' }"></ng-container>
               }
-            </div>
-          }
 
-          @if (layout() === 'column' || layout() === 'row') {
-            <label class="field-label">Alignement</label>
-            <div class="segmented">
-              @for (p of alignItems; track p.label) {
-                <button [class.active]="isActive('align-items', p.value)" (click)="setStyle('align-items', p.value)">{{ p.label }}</button>
+              @if (layout() === 'column' || layout() === 'row') {
+                <label class="field-label">Alignement</label>
+                <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: alignItems, prop: 'align-items' }"></ng-container>
               }
             </div>
           }
         </section>
       }
 
-      <!-- APPARENCE DU TEXTE -->
+      <!-- STYLE DU TEXTE -->
       @if (hasText()) {
         <section class="group">
-          <h4>Style du texte</h4>
+          <button class="group-header" (click)="toggleSection('text')">
+            <lucide-angular name="type" class="group-icon"></lucide-angular>
+            <span>Style du texte</span>
+            <lucide-angular [name]="isOpen('text') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+          </button>
+          @if (isOpen('text')) {
+            <div class="group-body">
+              <label class="field-label">Taille</label>
+              <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: fontSizes, prop: 'font-size' }"></ng-container>
 
-          <label class="field-label">Taille</label>
-          <div class="segmented">
-            @for (p of fontSizes; track p.label) {
-              <button [class.active]="isActive('font-size', p.value)" [title]="p.hint" (click)="setStyle('font-size', p.value)">{{ p.label }}</button>
-            }
-          </div>
+              <div class="split">
+                <div>
+                  <label class="field-label">Épaisseur</label>
+                  <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: fontWeights, prop: 'font-weight' }"></ng-container>
+                </div>
+                <div>
+                  <label class="field-label">Alignement</label>
+                  <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: textAligns, prop: 'text-align' }"></ng-container>
+                </div>
+              </div>
 
-          <div class="split">
-            <div>
-              <label class="field-label">Épaisseur</label>
-              <div class="segmented">
-                @for (p of fontWeights; track p.label) {
-                  <button [class.active]="isActive('font-weight', p.value)" (click)="setStyle('font-weight', p.value)">{{ p.label }}</button>
+              <label class="field-label">Couleur</label>
+              <div class="swatches">
+                @for (s of textColors; track s.label) {
+                  <button class="swatch" [class.active]="isActive('color', s.value)" [title]="s.label"
+                    [style.background]="swatchColor(s)" (click)="setStyle('color', s.value)"></button>
                 }
+                <label class="swatch custom" [class.active]="isCustomColor('color', textColors)" title="Couleur personnalisée">
+                  <input type="color" [ngModel]="customColor('color')" (ngModelChange)="setStyle('color', $event)">
+                </label>
               </div>
             </div>
-            <div>
-              <label class="field-label">Alignement</label>
-              <div class="segmented">
-                @for (p of textAligns; track p.label) {
-                  <button [class.active]="isActive('text-align', p.value)" [title]="p.hint" (click)="setStyle('text-align', p.value)">{{ p.label }}</button>
-                }
-              </div>
-            </div>
-          </div>
-
-          <label class="field-label">Couleur</label>
-          <div class="swatches">
-            @for (s of textColors; track s.label) {
-              <button class="swatch" [class.active]="isActive('color', s.value)" [title]="s.label"
-                [style.background]="swatchColor(s)" (click)="setStyle('color', s.value)"></button>
-            }
-            <label class="swatch custom" [class.active]="isCustomColor('color', textColors)" title="Couleur personnalisée">
-              <input type="color" [ngModel]="customColor('color')" (ngModelChange)="setStyle('color', $event)">
-            </label>
-          </div>
+          }
         </section>
       }
 
-      <!-- APPARENCE DU BLOC -->
+      <!-- APPARENCE -->
       <section class="group">
-        <h4>Apparence</h4>
+        <button class="group-header" (click)="toggleSection('look')">
+          <lucide-angular name="palette" class="group-icon"></lucide-angular>
+          <span>Apparence</span>
+          <lucide-angular [name]="isOpen('look') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+        </button>
+        @if (isOpen('look')) {
+          <div class="group-body">
+            <label class="field-label">Fond</label>
+            <div class="swatches">
+              @for (s of backgrounds; track s.label) {
+                <button class="swatch" [class.none]="!s.value" [class.active]="isActive('background-color', s.value)" [title]="s.label"
+                  [style.background]="swatchColor(s)" (click)="setStyle('background-color', s.value)"></button>
+              }
+              <label class="swatch custom" [class.active]="isCustomColor('background-color', backgrounds)" title="Couleur personnalisée">
+                <input type="color" [ngModel]="customColor('background-color')" (ngModelChange)="setStyle('background-color', $event)">
+              </label>
+            </div>
 
-        <label class="field-label">Fond</label>
-        <div class="swatches">
-          @for (s of backgrounds; track s.label) {
-            <button class="swatch" [class.none]="!s.value" [class.active]="isActive('background-color', s.value)" [title]="s.label"
-              [style.background]="swatchColor(s)" (click)="setStyle('background-color', s.value)"></button>
-          }
-          <label class="swatch custom" [class.active]="isCustomColor('background-color', backgrounds)" title="Couleur personnalisée">
-            <input type="color" [ngModel]="customColor('background-color')" (ngModelChange)="setStyle('background-color', $event)">
-          </label>
-        </div>
+            <label class="field-label">Coins</label>
+            <div class="segmented">
+              @for (p of radiuses; track p.label) {
+                <button [class.active]="isActive('border-radius', p.value)" (click)="setStyle('border-radius', p.value)">
+                  <span class="radius-dot" [style.border-radius]="p.value === '999px' ? '999px' : p.value === '24px' ? '6px' : p.value === '0' ? '0' : '3px'"></span>{{ p.label }}
+                </button>
+              }
+            </div>
 
-        <label class="field-label">Marge intérieure</label>
-        <div class="segmented">
-          @for (p of paddings; track p.label) {
-            <button [class.active]="isActive('padding', p.value)" (click)="setStyle('padding', p.value)">{{ p.label }}</button>
-          }
-        </div>
+            <label class="field-label">Bordure</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: borders, prop: 'border' }"></ng-container>
 
-        <label class="field-label">Coins</label>
-        <div class="segmented">
-          @for (p of radiuses; track p.label) {
-            <button [class.active]="isActive('border-radius', p.value)" (click)="setStyle('border-radius', p.value)">{{ p.label }}</button>
-          }
-        </div>
-
-        <label class="field-label">Bordure</label>
-        <div class="segmented">
-          @for (p of borders; track p.label) {
-            <button [class.active]="isActive('border', p.value)" (click)="setStyle('border', p.value)">{{ p.label }}</button>
-          }
-        </div>
-
-        <label class="field-label">Largeur</label>
-        <div class="segmented">
-          @for (p of widths; track p.label) {
-            <button [class.active]="isActive('width', p.value)" (click)="setStyle('width', p.value)">{{ p.label }}</button>
-          }
-        </div>
+            <label class="field-label">Ombre</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: shadows, prop: 'box-shadow' }"></ng-container>
+          </div>
+        }
       </section>
+
+      <!-- TAILLE ET ESPACEMENTS -->
+      <section class="group">
+        <button class="group-header" (click)="toggleSection('size')">
+          <lucide-angular name="maximize-2" class="group-icon"></lucide-angular>
+          <span>Taille et espacements</span>
+          <lucide-angular [name]="isOpen('size') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+        </button>
+        @if (isOpen('size')) {
+          <div class="group-body">
+            <div class="spacing-diagram">
+              <span class="outer-label">Espace autour</span>
+              <div class="inner-box"><span>Espace intérieur</span></div>
+            </div>
+
+            <label class="field-label">Espace intérieur</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: paddings, prop: 'padding' }"></ng-container>
+
+            <label class="field-label">Espace autour (au-dessus et en dessous)</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: margins, prop: 'margin' }"></ng-container>
+
+            <label class="field-label">Largeur</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: widths, prop: 'width' }"></ng-container>
+
+            <label class="field-label">Largeur maximum</label>
+            <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: maxWidths, prop: 'max-width' }"></ng-container>
+
+            <label class="field-label">Position du bloc</label>
+            <div class="segmented">
+              <button [class.active]="blockPosition() === 'left'" (click)="setBlockPosition('left')">À gauche</button>
+              <button [class.active]="blockPosition() === 'center'" (click)="setBlockPosition('center')">Centré</button>
+              <button [class.active]="blockPosition() === 'right'" (click)="setBlockPosition('right')">À droite</button>
+            </div>
+            <p class="hint">Le centrage se voit quand la largeur n'est pas « Pleine largeur ».</p>
+          </div>
+        }
+      </section>
+
+      <button class="reset-btn" (click)="resetStyles()">
+        <lucide-angular name="rotate-ccw" class="icon"></lucide-angular> Remettre le style par défaut
+      </button>
     } @else if (page(); as p) {
       <!-- PAGE SÉLECTIONNÉE -->
-      <section class="group">
-        <h4>Page</h4>
-        <label class="field-label">Nom de la page</label>
-        <input class="field" type="text" [ngModel]="p.name" (ngModelChange)="renamePage($event)">
-
-        <label class="field-label">Taille d'écran</label>
-        <div class="segmented">
-          @for (w of pageWidths; track w.label) {
-            <button [class.active]="isPageWidth(w.value)" (click)="setPageWidth(w.value)">{{ w.label }}</button>
-          }
+      <div class="selection-card">
+        <div class="selection-title">
+          <span class="type-icon"><lucide-angular name="file-text" class="icon"></lucide-angular></span>
+          <div class="title-text">
+            <input class="name-input" [ngModel]="p.name" (ngModelChange)="renamePage($event)" spellcheck="false" title="Renommer la page">
+            <span class="type-label">Page · {{ p.widgets.length }} bloc(s)</span>
+          </div>
         </div>
+      </div>
 
-        <p class="hint">{{ p.widgets.length }} bloc(s) sur cette page. Cliquez sur un bloc pour le modifier.</p>
-        <button class="secondary-btn danger" (click)="deletePage()">🗑 Supprimer la page</button>
+      <section class="group">
+        <div class="group-header static">
+          <lucide-angular name="maximize-2" class="group-icon"></lucide-angular>
+          <span>Taille d'écran</span>
+        </div>
+        <div class="group-body">
+          <div class="segmented">
+            @for (w of pageWidths; track w.label) {
+              <button [class.active]="isPageWidth(w.value)" (click)="setPageWidth(w.value)">{{ w.label }}</button>
+            }
+          </div>
+          <p class="hint">Vous pouvez aussi tirer le coin en bas à droite de la page.</p>
+        </div>
       </section>
+
+      @if (!p.widgets.length) {
+        <div class="tip">
+          <lucide-angular name="sparkles" class="tip-icon"></lucide-angular>
+          <p>Pour démarrer vite, ajoutez un <strong>Menu</strong>, une <strong>Bannière d'accueil</strong> et un <strong>Pied de page</strong> depuis les « Sections toutes prêtes ».</p>
+        </div>
+      }
+
+      <button class="reset-btn danger" (click)="deletePage()">
+        <lucide-angular name="trash-2" class="icon"></lucide-angular> Supprimer la page
+      </button>
     } @else {
       <div class="empty-state">
-        <span class="empty-icon">👆</span>
+        <span class="empty-illustration">
+          <lucide-angular name="mouse-pointer-click" class="empty-icon"></lucide-angular>
+        </span>
+        <p class="empty-title">Rien de sélectionné</p>
         <p>Cliquez sur un élément de la page pour le modifier ici.</p>
       </div>
     }
+  </div>
 
-    <!-- AIDE -->
-    <section class="group help">
-      <h4>Raccourcis</h4>
+  <!-- AIDE -->
+  <footer class="properties-footer">
+    <button class="footer-btn" (click)="showShortcuts.set(!showShortcuts())">
+      <lucide-angular name="keyboard" class="icon"></lucide-angular> Raccourcis clavier
+      <lucide-angular [name]="showShortcuts() ? 'chevron-down' : 'chevron-up'" class="icon end"></lucide-angular>
+    </button>
+    @if (showShortcuts()) {
       <ul class="shortcuts">
         <li><kbd>Double-clic</kbd> Modifier un texte</li>
         <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> Annuler</li>
@@ -223,9 +325,7 @@
         <li><kbd>Suppr</kbd> Supprimer le bloc</li>
         <li><kbd>Échap</kbd> Désélectionner</li>
       </ul>
-      @if (!widget()) {
-        <button class="link-btn muted" (click)="resetProject()">Repartir d'un projet vierge</button>
-      }
-    </section>
-  </div>
+      <button class="link-btn muted" (click)="resetProject()">Repartir d'un projet vierge</button>
+    }
+  </footer>
 </div>

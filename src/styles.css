@@ -20,3 +20,14 @@ body{
     --text-second: #999999;
     --accent: #3b82f6;
 }
+
+/* Icônes Lucide : la taille se règle par une classe CSS (width/height) sur l'élément */
+lucide-angular {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+lucide-angular > svg {
+    width: 100%;
+    height: 100%;
+}

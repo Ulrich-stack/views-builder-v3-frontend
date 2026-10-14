@@ -1,0 +1,171 @@
+:host {
+  display: block;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-border) transparent;
+}
+
+.layers {
+  padding: 12px 8px 16px;
+}
+
+.layers-hint {
+  margin: 0 6px 12px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-second);
+}
+
+.page-node {
+  margin-bottom: 12px;
+}
+
+.page-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.page-row:hover {
+  background: var(--item-bg);
+}
+
+.page-row.active {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.page-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--item-bg);
+  color: var(--text-second);
+}
+
+.node-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding-right: 4px;
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.node-row:hover {
+  background: var(--item-bg);
+}
+
+.node-row.selected {
+  background: var(--accent);
+  color: #fff;
+}
+
+.toggle {
+  display: flex;
+  padding: 2px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-spacer {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+}
+
+.node-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--text-second);
+}
+
+.node-row.selected .node-icon {
+  color: #fff;
+}
+
+.node-name {
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.node-preview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-second);
+  font-size: 0.72rem;
+}
+
+.node-row.selected .node-preview {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.node-delete {
+  display: flex;
+  margin-left: auto;
+  padding: 4px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.node-row:hover .node-delete {
+  opacity: 0.7;
+}
+
+.node-delete:hover {
+  opacity: 1 !important;
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.delete-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.empty {
+  margin: 4px 0 0 36px;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--text-second);
+}

@@ -3,6 +3,7 @@
   [ngStyle]="widget().styles"
   [class.selected]="editor.selectedWidgetId() === widget().id"
   [class.editing]="editing()"
+  [class.hovered]="editor.hoveredWidgetId() === widget().id"
   [class.is-container]="widget().children"
   [class.drop-before]="dropPosition() === 'before'"
   [class.drop-after]="dropPosition() === 'after'"

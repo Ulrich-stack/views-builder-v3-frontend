@@ -63,6 +63,9 @@ export class EditorService {
   // Bloc survolé pendant un glisser-déposer, pour afficher le repère d'insertion
   dropTarget = signal<DropTarget | null>(null);
 
+  // Bloc survolé dans le panneau Calques, mis en évidence sur la page
+  hoveredWidgetId = signal<string | null>(null);
+
   private undoStack = signal<Snapshot[]>([]);
   private redoStack = signal<Snapshot[]>([]);
   private lastHistoryKey: string | null = null;
@@ -329,6 +332,60 @@ export class EditorService {
       case 'media': return 'Image';
       default: return 'Bloc';
     }
+  }
+
+  /**
+   * Ajout par simple clic depuis la boîte à composants : dans le bloc sélectionné
+   * s'il peut contenir des éléments, juste après lui sinon, ou à la fin de la page.
+   */
+  addFromToolbox(item: ToolboxItem): Widget | null {
+    const widget = this.createWidgetFromToolboxItem(item);
+    const selected = this.selectedWidget();
+    const location = selected ? this.findLocation(selected.id) : null;
+
+    if (selected && location) {
+      if (selected.type === 'container' && selected.children) {
+        this.addWidget(widget, selected.id, location.pageId);
+      } else {
+        this.addWidget(widget, location.parentId, location.pageId, location.index + 1);
+      }
+    } else {
+      const pageId = this.selectedPage() && !this.selectedPage()!.isDesignSystem
+        ? this.selectedPageId()
+        : this.pages().find(p => !p.isDesignSystem)?.id ?? null;
+      if (!pageId) return null;
+      this.addWidget(widget, null, pageId);
+    }
+    this.selectWidget(widget.id);
+    return widget;
+  }
+
+  /** Chemin du bloc sélectionné, du plus haut parent jusqu'à lui (fil d'Ariane). */
+  getPath(widgetId: string): Widget[] {
+    for (const page of this.pages()) {
+      const path = this.pathRecursive(page.widgets, widgetId);
+      if (path) return path;
+    }
+    return [];
+  }
+
+  private pathRecursive(widgets: Widget[], id: string): Widget[] | null {
+    for (const w of widgets) {
+      if (w.id === id) return [w];
+      if (w.children) {
+        const sub = this.pathRecursive(w.children, id);
+        if (sub) return [w, ...sub];
+      }
+    }
+    return null;
+  }
+
+  /** Remet les styles par défaut du bloc (selon son type). */
+  resetWidgetStyles(widgetId: string) {
+    const widget = this.findWidgetInPages(this.pages(), widgetId);
+    if (!widget) return;
+    const styles = this.getDefaultStyles({ type: widget.type, element: widget.element } as ToolboxItem);
+    this.updateWidget(widgetId, { styles });
   }
 
   // MODIFICATION DES WIDGETS
@@ -629,6 +686,14 @@ export class EditorService {
     };
 
     if (item.type === 'container') {
+      switch (item.element) {
+        case 'section':
+          return { ...base, 'padding': '48px 24px', 'min-height': '160px', 'width': '100%', 'display': 'flex', 'flex-direction': 'column', 'gap': 'var(--spacing-base)' };
+        case 'grid':
+          return { ...base, 'min-height': '100px', 'width': '100%', 'display': 'grid', 'grid-template-columns': 'repeat(2, 1fr)', 'gap': 'var(--spacing-base)' };
+        case 'nav':
+          return { ...base, 'min-height': '60px', 'width': '100%', 'display': 'flex', 'flex-direction': 'row', 'flex-wrap': 'wrap', 'align-items': 'center', 'gap': 'var(--spacing-base)' };
+      }
       return {
         ...base,
         'min-height': '100px',
@@ -638,6 +703,8 @@ export class EditorService {
         'width': '100%'
       };
     }
+
+    if (item.type === 'media') return { ...base, 'padding': '0', 'border-radius': 'var(--radius-main)', 'overflow': 'hidden' };
 
     if (item.type === 'action') {
       return {

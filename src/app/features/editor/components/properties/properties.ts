@@ -1,5 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { NgTemplateOutlet } from '@angular/common';
 import { DS_PAGE_ID, EditorService } from '../../../../../core/services/EditorService/editor-service';
 import { Widget } from '../../../../../core/models/widget.model';
 
@@ -27,7 +29,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-properties',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule, NgTemplateOutlet],
   templateUrl: './properties.html',
   styleUrl: './properties.css',
 })
@@ -48,6 +50,40 @@ export class Properties {
     if (w.element === 'a') return 'Lien';
     return TYPE_LABELS[w.type] ?? 'Bloc';
   });
+
+  typeIcon = computed(() => {
+    const w = this.widget();
+    if (!w) return 'box';
+    if (w.element === 'img') return 'image';
+    if (w.element === 'video') return 'video';
+    if (w.element === 'a') return 'link';
+    return { container: 'box', text: 'type', action: 'mouse-pointer-2', input: 'text-cursor-input', media: 'image' }[w.type] ?? 'box';
+  });
+
+  /** Fil d'Ariane : page puis blocs parents jusqu'au bloc sélectionné */
+  path = computed(() => {
+    const w = this.widget();
+    return w ? this.editor.getPath(w.id) : [];
+  });
+
+  pageName = computed(() => this.editor.selectedPage()?.name ?? '');
+
+  // Sections repliables du panneau (toutes ouvertes par défaut)
+  private closedSections = signal<Set<string>>(new Set());
+  showShortcuts = signal(false);
+
+  isOpen(section: string): boolean {
+    return !this.closedSections().has(section);
+  }
+
+  toggleSection(section: string) {
+    this.closedSections.update(set => {
+      const next = new Set(set);
+      if (next.has(section)) next.delete(section);
+      else next.add(section);
+      return next;
+    });
+  }
 
   hasText = computed(() => ['text', 'action'].includes(this.widget()?.type ?? ''));
   isContainer = computed(() => this.widget()?.type === 'container');
@@ -127,6 +163,62 @@ export class Properties {
     { label: 'Auto', value: null },
     { label: 'Pleine largeur', value: '100%' },
   ];
+
+  readonly shadows: Preset[] = [
+    { label: 'Aucune', value: null },
+    { label: 'Légère', value: '0 2px 8px rgba(0, 0, 0, 0.12)' },
+    { label: 'Moyenne', value: '0 8px 24px rgba(0, 0, 0, 0.18)' },
+    { label: 'Forte', value: '0 20px 50px rgba(0, 0, 0, 0.3)' },
+  ];
+
+  readonly margins: Preset[] = [
+    { label: 'Aucun', value: null },
+    { label: 'Petit', value: '8px 0' },
+    { label: 'Moyen', value: '24px 0' },
+    { label: 'Grand', value: '48px 0' },
+  ];
+
+  readonly maxWidths: Preset[] = [
+    { label: 'Libre', value: null },
+    { label: 'Étroit', value: '480px' },
+    { label: 'Moyen', value: '720px' },
+  ];
+
+  readonly imageHeights: Preset[] = [
+    { label: 'Auto', value: null },
+    { label: 'Petite', value: '160px' },
+    { label: 'Moyenne', value: '280px' },
+    { label: 'Grande', value: '420px' },
+  ];
+
+  blockPosition = computed(() => {
+    const left = this.style('margin-left');
+    const right = this.style('margin-right');
+    if (left === 'auto' && right === 'auto') return 'center';
+    if (left === 'auto') return 'right';
+    return 'left';
+  });
+
+  setBlockPosition(position: 'left' | 'center' | 'right') {
+    const w = this.widget();
+    if (!w) return;
+    this.editor.setWidgetStyles(w.id, {
+      'margin-left': position === 'left' ? null : 'auto',
+      'margin-right': position === 'right' ? null : 'auto',
+    });
+  }
+
+  rename(name: string) {
+    const w = this.widget();
+    if (w) this.editor.updateWidget(w.id, { name }, 'rename:' + w.id);
+  }
+
+  resetStyles() {
+    const w = this.widget();
+    if (w && confirm('Remettre le style par défaut de ce bloc ? (Ctrl+Z pour annuler)')) {
+      this.editor.resetWidgetStyles(w.id);
+    }
+  }
 
   readonly gaps: Preset[] = [
     { label: 'Aucun', value: '0' },

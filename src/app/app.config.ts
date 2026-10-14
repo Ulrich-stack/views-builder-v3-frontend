@@ -3,29 +3,25 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import {
-  LUCIDE_ICONS, LucideAngularModule, LucideIconProvider, LayoutTemplate, Box, Columns2, Menu, Type, AlignLeft,
-  Image as ImageIcon, Smile, MousePointer2, PlusSquare,
-  Search, Trash2, Settings, Heading1, Heading2,
-  Link,
-  Image,
-  Video,
-  TextCursorInput,
-  FileText,
-  ListOrdered,
-  CheckSquare,
-  MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers
+  LucideAngularModule,
+  // Boîte à composants
+  LayoutTemplate, Box, Columns2, Menu, Type, AlignLeft, Smile, MousePointer2, Heading1, Heading2, Link, Image,
+  Video, TextCursorInput, FileText, CheckSquare, MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers,
+  PanelTop, PanelBottom, Images,
+  // Interface
+  Search, Trash2, Plus, X, MousePointerClick, ChevronDown, ChevronRight, ChevronUp, Palette, Maximize2,
+  ArrowUp, ArrowDown, Copy, CornerLeftUp, Pencil, RotateCcw, Keyboard, Sparkles
 } from 'lucide-angular';
-
-const myIcons = {}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     importProvidersFrom(
       LucideAngularModule.pick({
-        LayoutTemplate, Box, Columns2, Menu, Type, AlignLeft,
-        ImageIcon, Smile, MousePointer2, PlusSquare,
-        Search, Trash2, Settings, Heading1, Heading2, Link, Image, Video, TextCursorInput, FileText, ListOrdered, CheckSquare,
-        MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers
+        LayoutTemplate, Box, Columns2, Menu, Type, AlignLeft, Smile, MousePointer2, Heading1, Heading2, Link, Image,
+        Video, TextCursorInput, FileText, CheckSquare, MonitorPlay, LayoutGrid, Tag, MessageSquare, Mail, Layers,
+        PanelTop, PanelBottom, Images,
+        Search, Trash2, Plus, X, MousePointerClick, ChevronDown, ChevronRight, ChevronUp, Palette, Maximize2,
+        ArrowUp, ArrowDown, Copy, CornerLeftUp, Pencil, RotateCcw, Keyboard, Sparkles
       })
     ),
     provideBrowserGlobalErrorListeners(),

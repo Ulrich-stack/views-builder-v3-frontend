@@ -1,35 +1,130 @@
 <div class="toolbox-container">
-    <header class="toolbox-header">
-        <h3>Composants</h3>
-    </header>
+    <nav class="tabs">
+        <button class="tab" [class.active]="tab() === 'add'" (click)="tab.set('add')">
+            <lucide-angular name="plus" class="tab-icon"></lucide-angular> Ajouter
+        </button>
+        <button class="tab" [class.active]="tab() === 'layers'" (click)="tab.set('layers')">
+            <lucide-angular name="layers" class="tab-icon"></lucide-angular> Calques
+        </button>
+    </nav>
 
-    <div class="search-box">
-        <input type="text" placeholder="Rechercher un composant...">
-    </div>
+    @if (tab() === 'add') {
+        <div class="search-box">
+            <lucide-angular name="search" class="search-icon"></lucide-angular>
+            <input type="text" placeholder="Rechercher (titre, image, menu...)"
+                [value]="search()" (input)="search.set($any($event.target).value)"
+                (keydown.escape)="search.set('')">
+            @if (search()) {
+                <button class="clear-search" (click)="search.set('')" title="Effacer">
+                    <lucide-angular name="x" class="clear-icon"></lucide-angular>
+                </button>
+            }
+        </div>
 
-    <div class="categories-list">
-        @for (cat of categories; track cat.name) {
-            <div class="category">
-                <span class="category-title"> {{cat.name}} </span>
-                <div class="items-grid">
-                    @for (item of cat.items; track item.label) {
-                        
-                        <div class="toolbox-item" 
-                             [class.is-blueprint]="item.type === 'blueprint'" 
-                             draggable="true" 
-                             (dragstart)="onDragStart($event, item)">
-                            
-                            <lucide-angular [name]="item.icon" class="item-icon"></lucide-angular>
-                            <span class="item-label"> {{item.label}} </span>
+        <p class="add-hint">
+            <lucide-angular name="mouse-pointer-click" class="hint-icon"></lucide-angular>
+            <span>Cliquez pour ajouter {{ addTargetHint() }}, ou glissez à l'endroit voulu.</span>
+        </p>
 
-                            @if (item.type === 'blueprint') {
-                                <span class="magic-dot" title="Composant Intelligent"></span>
-                            }
-                        </div>
+        <div class="categories-list">
+            @for (cat of categories(); track cat.name) {
+                <section class="category">
+                    <button class="category-title" (click)="toggleCategory(cat.name)">
+                        <lucide-angular [name]="isCollapsed(cat.name) ? 'chevron-right' : 'chevron-down'" class="chevron"></lucide-angular>
+                        <span>{{ cat.name }}</span>
+                        <span class="count">{{ cat.items.length }}</span>
+                    </button>
 
+                    @if (!isCollapsed(cat.name)) {
+                        @if (cat.name === blueprintCategory) {
+                            <div class="blueprint-grid">
+                                @for (item of cat.items; track item.label) {
+                                    <button class="blueprint-card" draggable="true" [title]="item.description ?? ''"
+                                        (dragstart)="onDragStart($event, item)" (click)="add(item)">
+                                        <div class="thumb" [ngStyle]="editor.globalVariables()">
+                                            @switch (item.thumb) {
+                                                @case ('menu') {
+                                                    <div class="t-row t-between t-pad">
+                                                        <span class="t-dot"></span>
+                                                        <span class="t-row t-gap"><span class="t-line xs"></span><span class="t-line xs"></span><span class="t-btn sm"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('hero') {
+                                                    <div class="t-col t-center t-fill">
+                                                        <span class="t-title"></span>
+                                                        <span class="t-line md muted"></span>
+                                                        <span class="t-row t-gap"><span class="t-btn"></span><span class="t-btn ghost"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('text-image') {
+                                                    <div class="t-row t-fill t-gap t-pad">
+                                                        <span class="t-col t-half"><span class="t-title sm"></span><span class="t-line muted"></span><span class="t-line muted"></span><span class="t-btn sm"></span></span>
+                                                        <span class="t-img t-half"></span>
+                                                    </div>
+                                                }
+                                                @case ('bento') {
+                                                    <div class="t-bento t-pad">
+                                                        <span class="t-card big"></span><span class="t-card wide accent"></span><span class="t-card"></span><span class="t-card"></span>
+                                                    </div>
+                                                }
+                                                @case ('gallery') {
+                                                    <div class="t-col t-center t-fill t-pad">
+                                                        <span class="t-title sm"></span>
+                                                        <span class="t-row t-gap t-stretch"><span class="t-img sq"></span><span class="t-img sq"></span><span class="t-img sq"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('pricing') {
+                                                    <div class="t-center t-fill">
+                                                        <span class="t-card t-col tall"><span class="t-line xs accent-line"></span><span class="t-title sm"></span><span class="t-line muted"></span><span class="t-btn full"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('testimonial') {
+                                                    <div class="t-center t-fill">
+                                                        <span class="t-card t-col wide-card"><span class="t-line muted"></span><span class="t-line md muted"></span><span class="t-row t-gap"><span class="t-avatar"></span><span class="t-line xs"></span></span></span>
+                                                    </div>
+                                                }
+                                                @case ('newsletter') {
+                                                    <div class="t-center t-fill">
+                                                        <span class="t-row t-gap"><span class="t-input"></span><span class="t-btn"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('glass') {
+                                                    <div class="t-center t-fill glass-bg">
+                                                        <span class="t-card t-col glass"><span class="t-title sm"></span><span class="t-line muted"></span></span>
+                                                    </div>
+                                                }
+                                                @case ('footer') {
+                                                    <div class="t-col t-fill t-end">
+                                                        <span class="t-row t-between t-pad t-border"><span class="t-line xs muted"></span><span class="t-row t-gap"><span class="t-line xs muted"></span><span class="t-line xs muted"></span></span></span>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <span class="blueprint-label">{{ item.label }}</span>
+                                    </button>
+                                }
+                            </div>
+                        } @else {
+                            <div class="items-grid">
+                                @for (item of cat.items; track item.label) {
+                                    <button class="toolbox-item" draggable="true" [title]="item.description ?? ''"
+                                        (dragstart)="onDragStart($event, item)" (click)="add(item)">
+                                        <lucide-angular [name]="item.icon" class="item-icon"></lucide-angular>
+                                        <span class="item-label">{{ item.label }}</span>
+                                    </button>
+                                }
+                            </div>
+                        }
                     }
+                </section>
+            } @empty {
+                <div class="no-result">
+                    <p>Aucun élément pour « {{ search() }} »</p>
+                    <button class="link" (click)="search.set('')">Tout afficher</button>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    } @else {
+        <app-layers></app-layers>
+    }
 </div>

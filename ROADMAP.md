@@ -14,6 +14,9 @@ Objectif : quelqu'un construit sa page de A à Z sans qu'on lui explique.
 - [x] Repère visuel indiquant où un bloc va être déposé, insertion à la bonne position
 - [x] Ajouter une page
 - [x] Raccourcis clavier (Suppr, Ctrl+D, Échap)
+- [x] Ajout d'un bloc en un clic, recherche dans les composants
+- [x] Panneau Calques (arbre des blocs) et fil d'Ariane dans les propriétés
+- [x] 4 nouvelles sections prêtes : Menu, Texte + image, Galerie photos, Pied de page
 
 ## Phase 2 — Beau automatiquement
 
