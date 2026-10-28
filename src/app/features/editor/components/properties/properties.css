@@ -630,3 +630,39 @@ kbd {
   color: #fff;
   text-decoration: underline;
 }
+
+/* Choix du pictogramme du bloc « Icône » */
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 4px;
+  max-height: 188px;
+  overflow-y: auto;
+}
+
+.icon-choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: var(--item-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.icon-choice:hover {
+  border-color: var(--accent);
+}
+
+.icon-choice.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.icon-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

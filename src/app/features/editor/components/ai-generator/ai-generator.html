@@ -1,0 +1,117 @@
+<div class="ai-generator">
+    <section class="block">
+        <label class="field-label" for="ai-prompt">Décrivez la page à créer</label>
+        <textarea id="ai-prompt" rows="5"
+            placeholder="Ex : page d'accueil pour une boulangerie bio, avec les horaires et une section commande"
+            [value]="prompt()" (input)="prompt.set($any($event.target).value)" (keydown)="onKeydown($event)"
+            (paste)="onPaste($event)" [disabled]="loading()"></textarea>
+
+        @if (!prompt() && !image()) {
+            <div class="examples">
+                @for (example of examples; track example) {
+                    <button class="example" (click)="useExample(example)">{{ example }}</button>
+                }
+            </div>
+        }
+
+        @if (image(); as img) {
+            <div class="attachment">
+                <img [src]="img.preview" alt="Capture de référence">
+                <div class="attachment-text">
+                    <span class="attachment-name">{{ img.name }}</span>
+                    <span class="attachment-hint">La page reprendra sa structure, avec votre thème.</span>
+                </div>
+                <button class="icon-btn" (click)="removeImage()" [disabled]="loading()" title="Retirer la capture">
+                    <lucide-angular name="x" class="small-icon"></lucide-angular>
+                </button>
+            </div>
+        } @else {
+            <label class="attach-btn" [class.disabled]="loading()">
+                <lucide-angular name="image" class="small-icon"></lucide-angular>
+                S'inspirer d'une capture d'écran
+                <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onImageSelected($event)" [disabled]="loading()">
+            </label>
+        }
+
+        <label class="colors-toggle" [class.disabled]="loading()">
+            <input type="checkbox" [checked]="chooseColors()" (change)="chooseColors.set($any($event.target).checked)"
+                [disabled]="loading()">
+            Laisser l'IA choisir les couleurs
+        </label>
+
+        <p class="context">
+            Thème : <strong>{{ themeName() ?? 'personnalisé' }}</strong>
+            @if (chooseColors()) { (couleurs remplacées après la génération) }
+            @if (targetPageName(); as page) { · ajout à la fin de « {{ page }} » }
+        </p>
+
+        @if (loading()) {
+            <button class="generate stop" (click)="stop()">
+                <lucide-angular name="x" class="generate-icon"></lucide-angular>
+                Arrêter
+            </button>
+            <p class="status" role="status">
+                @if (received() === 0) {
+                    L'IA compose la page…
+                } @else {
+                    {{ received() }} section{{ received() > 1 ? 's' : '' }} ajoutée{{ received() > 1 ? 's' : '' }}, la suite arrive…
+                }
+            </p>
+        } @else {
+            <button class="generate" (click)="generate()" [disabled]="!canGenerate()">
+                <lucide-angular name="sparkles" class="generate-icon"></lucide-angular>
+                Générer
+            </button>
+            <p class="shortcut">Ctrl + Entrée pour générer · Ctrl + V pour coller une capture</p>
+        }
+
+        @if (error(); as message) {
+            <p class="status error" role="alert">{{ message }}</p>
+        }
+        @if (success(); as message) {
+            <p class="status success" role="status">{{ message }}</p>
+        }
+    </section>
+
+    <section class="block audit">
+        <div class="block-title">
+            <h4>Lisibilité</h4>
+            <button class="secondary-btn" (click)="runAudit()" [disabled]="loading()">Vérifier la page</button>
+        </div>
+        <p class="hint">Repère les textes trop peu contrastés sur leur fond (normes d'accessibilité WCAG).</p>
+
+        @if (issues(); as list) {
+            @if (list.length === 0) {
+                <p class="status success" role="status">Tous les textes sont lisibles.</p>
+            } @else {
+                <p class="status" role="status">
+                    {{ list.length }} texte{{ list.length > 1 ? 's' : '' }} trop peu contrasté{{ list.length > 1 ? 's' : '' }},
+                    {{ groups().length }} cause{{ groups().length > 1 ? 's' : '' }} :
+                </p>
+                <ul class="issues">
+                    @for (group of groups(); track groupKey(group)) {
+                        <li class="issue">
+                            <span class="swatch" [style.background]="group.background" [style.color]="group.color" aria-hidden="true">Aa</span>
+                            <button class="issue-text" (click)="selectIssue(group.issues[0])" title="Sélectionner le premier bloc concerné">
+                                « {{ group.issues[0].text }} »
+                                @if (group.issues.length > 1) {
+                                    <span class="issue-more">et {{ group.issues.length - 1 }} autre{{ group.issues.length > 2 ? 's' : '' }}</span>
+                                }
+                                <span class="issue-ratio">{{ formatRatio(group.ratio) }}:1 · minimum {{ group.minimum === 3 ? '3' : '4,5' }}:1</span>
+                            </button>
+                            @if (canFix(group)) {
+                                <button class="secondary-btn" (click)="fixGroup(group)" [disabled]="!!fixingKey()"
+                                    [title]="comesFromTheme(group) ? 'Ajuste les couleurs du thème : corrige tous ces textes d\'un coup' : 'Demande à l\'IA de corriger ces blocs'">
+                                    {{ fixingKey() === groupKey(group) ? 'Correction…' : (comesFromTheme(group) ? 'Ajuster le thème' : 'Corriger') }}
+                                </button>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        }
+        @if (auditError(); as message) {
+            <p class="status error" role="alert">{{ message }}</p>
+        }
+    </section>
+</div>

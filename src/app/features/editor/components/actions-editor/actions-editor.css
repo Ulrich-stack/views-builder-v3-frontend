@@ -1,0 +1,129 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.72rem;
+  color: var(--text-second);
+  margin-top: 6px;
+}
+
+.hint {
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--text-second);
+}
+
+.warning {
+  font-size: 0.7rem;
+  color: #fbbf24;
+}
+
+.field {
+  width: 100%;
+  min-width: 0;
+  background-color: var(--item-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  color: white;
+  font-family: inherit;
+  font-size: 0.78rem;
+  outline: none;
+}
+
+.field:focus {
+  border-color: var(--accent);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  background: var(--sidebar-bg);
+}
+
+.action-head,
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-head {
+  gap: 2px;
+}
+
+.step {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.inline-label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--text-second);
+}
+
+.mini {
+  flex-shrink: 0;
+  width: 20px;
+  height: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-second);
+  cursor: pointer;
+}
+
+.mini:hover:not(:disabled) {
+  background: var(--item-bg);
+  color: #fff;
+}
+
+.mini.danger:hover {
+  color: #f87171;
+}
+
+.mini:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.add {
+  padding: 7px;
+  background: none;
+  border: 1px dashed var(--sidebar-border);
+  border-radius: 6px;
+  color: var(--text-second);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.add:hover {
+  color: #fff;
+  border-color: var(--text-second);
+}

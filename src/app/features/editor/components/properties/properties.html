@@ -52,6 +52,9 @@
         </div>
       </div>
 
+      <!-- MODIFICATION PAR L'IA -->
+      <app-ai-edit-box [widgetId]="w.id" [widgetType]="w.type" />
+
       <!-- CONTENU -->
       @if (hasText() || w.type === 'media' || w.type === 'input') {
         <section class="group">
@@ -83,6 +86,19 @@
                 }
               }
 
+              @if (w.element === 'icon') {
+                <label class="field-label">Pictogramme</label>
+                <div class="icon-picker" role="listbox" aria-label="Pictogramme">
+                  @for (icon of icons; track icon.name) {
+                    <button type="button" class="icon-choice" role="option" [title]="icon.name"
+                            [class.active]="config('icon') === icon.name" [attr.aria-selected]="config('icon') === icon.name"
+                            (click)="setConfig('icon', icon.name)">
+                      <lucide-angular [img]="icon.data" [size]="18"></lucide-angular>
+                    </button>
+                  }
+                </div>
+              }
+
               @if (w.type === 'input') {
                 @if (w.element === 'checkbox') {
                   <label class="field-label">Texte à côté de la case</label>
@@ -96,6 +112,20 @@
           }
         </section>
       }
+
+      <!-- INTERACTIONS -->
+      <section class="group">
+        <button class="group-header" (click)="toggleSection('interactions')">
+          <lucide-angular name="mouse-pointer-click" class="group-icon"></lucide-angular>
+          <span>Interactions</span>
+          <lucide-angular [name]="isOpen('interactions') ? 'chevron-up' : 'chevron-down'" class="group-chevron"></lucide-angular>
+        </button>
+        @if (isOpen('interactions')) {
+          <div class="group-body">
+            <app-actions-editor [widget]="w" />
+          </div>
+        }
+      </section>
 
       <!-- DISPOSITION (CONTENEURS) -->
       @if (isContainer()) {

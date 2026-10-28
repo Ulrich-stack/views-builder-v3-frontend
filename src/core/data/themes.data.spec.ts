@@ -1,4 +1,4 @@
-import { checkReadability, fixReadability, generatePalette, GOOGLE_FONTS_URL, FONT_PAIRINGS, FONTS, THEME_PRESETS } from './themes.data';
+import { checkReadability, fixReadability, generatePalette, GOOGLE_FONTS_URL, FONT_PAIRINGS, FONTS, THEME_PRESETS, strengthenContrast } from './themes.data';
 import { contrastRatio, hexToHsl, hslToHex, readableOn } from '../utils/color';
 
 describe('Couleurs', () => {
@@ -54,5 +54,23 @@ describe('Thèmes', () => {
       expect(loaded.has(theme.designSystem.typography.headingFamily!)).toBe(true);
     }
     expect(GOOGLE_FONTS_URL).toContain('family=Playfair+Display');
+  });
+});
+
+describe('strengthenContrast', () => {
+  it('amène tous les textes du thème au niveau WCAG AA (4,5:1)', () => {
+    const colors = strengthenContrast({
+      primary: '#3b8fd0', secondary: '#312e81', bg: '#f8fafc', surface: '#e9edf2', text: '#1e293b', muted: '#64748b',
+    });
+    for (const background of [colors.bg, colors.surface]) {
+      expect(contrastRatio(colors.muted, background)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(colors.primary, background)).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrastRatio(readableOn(colors.primary), colors.primary)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('ne touche pas à un thème déjà lisible', () => {
+    const colors = { primary: '#1d4ed8', secondary: '#0f172a', bg: '#ffffff', surface: '#f1f5f9', text: '#0f172a', muted: '#475569' };
+    expect(strengthenContrast(colors)).toEqual(colors);
   });
 });

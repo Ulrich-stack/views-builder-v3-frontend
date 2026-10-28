@@ -278,7 +278,7 @@ export const WIDGET_CATALOG: ToolboxCategory[] = [
         items: [
             { type: 'media', label: 'Image', icon: 'image', element: 'img', description: 'Une photo ou une illustration', keywords: 'photo picture' },
             { type: 'media', label: 'Vidéo', icon: 'video', element: 'video', description: 'Une vidéo à lire sur la page', keywords: 'film' },
-            { type: 'media', label: 'Icône', icon: 'smile', element: 'lucide-icon', description: 'Un petit pictogramme', keywords: 'icon picto' },
+            { type: 'media', label: 'Icône', icon: 'smile', element: 'icon', description: 'Un petit pictogramme au trait fin', keywords: 'icon picto pictogramme' },
         ]
     },
     {

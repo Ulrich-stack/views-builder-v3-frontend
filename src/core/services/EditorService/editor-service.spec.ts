@@ -26,6 +26,60 @@ describe('EditorService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('sections générées par l\'IA', () => {
+    const generated = [
+      { type: 'container', element: 'section', name: 'Hero', styles: {}, children: [
+        { type: 'text', element: 'h1', name: 'Titre', content: 'Bienvenue' },
+        { type: 'action', element: 'button', name: 'Bouton', content: 'Réserver', styles: { padding: '12px' } },
+      ] },
+      { type: 'container', element: 'section', name: 'Contact', styles: {}, children: [] },
+    ];
+
+    it('ajoute toutes les sections à la fin de la page, en une seule étape annulable', () => {
+      service.addWidget(text('existant'), null, 'page-1');
+      const added = service.addGeneratedWidgets(generated, 'page-1');
+
+      const widgets = service.pages().find(p => p.id === 'page-1')!.widgets;
+      expect(added).toBe(2);
+      expect(widgets.map(w => w.name)).toEqual(['existant', 'Hero', 'Contact']);
+      expect(widgets[1].children![1].styles['background-color']).toBe('var(--primary)');
+      expect(service.selectedWidgetId()).toBe(widgets[1].id);
+
+      service.undo();
+      expect(rootIds()).toEqual(['existant']);
+    });
+
+    it('regroupe les sections reçues en direct dans une seule étape annulable', () => {
+      service.addGeneratedWidgets([generated[0]], 'page-1');
+      service.addGeneratedWidgets([generated[1]], 'page-1', { continueStep: true, select: false });
+      expect(rootIds().length).toBe(2);
+
+      service.undo();
+      expect(rootIds()).toEqual([]);
+    });
+
+    it('remplace un bloc par sa version modifiée en gardant son identifiant', () => {
+      service.addWidget(container('box', [text('old')]), null, 'page-1');
+      const replaced = service.replaceWithBlueprint('box', {
+        type: 'container', element: 'div', name: 'Nouveau', styles: { gap: '16px' },
+        children: [{ type: 'text', element: 'h2', content: 'Titre' }],
+      });
+
+      const box = service.pages().find(p => p.id === 'page-1')!.widgets[0];
+      expect(replaced).toBe(true);
+      expect(box.id).toBe('box');
+      expect(box.styles['gap']).toBe('16px');
+      expect(box.children![0].content).toBe('Titre');
+
+      service.undo();
+      expect(service.pages().find(p => p.id === 'page-1')!.widgets[0].children![0].id).toBe('old');
+    });
+
+    it("n'ajoute rien sans page de contenu", () => {
+      expect(service.addGeneratedWidgets(generated, null)).toBe(0);
+    });
+  });
+
   describe('ajout et déplacement', () => {
     it('insère un bloc à la position demandée', () => {
       service.addWidget(text('a'), null, 'page-1');
@@ -207,6 +261,76 @@ describe('EditorService', () => {
       TestBed.configureTestingModule({});
       const reloaded = TestBed.inject(EditorService);
       expect(reloaded.pages().length).toBe(2);
+    });
+  });
+
+  describe('interactions', () => {
+    const input = (id: string): Widget => ({ id, type: 'input', name: id, element: 'input', styles: {}, config: {} });
+    const button = (id: string, actions: any[]): Widget =>
+      ({ id, type: 'action', name: id, element: 'button', styles: {}, config: { actions }, content: 'Envoyer' });
+    const findIn = (id: string) => service.getPath(id).at(-1);
+
+    it("garde les identifiants des blocs dont l'IA a recopié le repère, et relie les nouvelles cibles", () => {
+      service.addWidget(container('form', [input('mail'), button('btn', [])]), null, 'page-1');
+      service.addWidget(text('dehors'), null, 'page-1');
+      const ok = service.replaceWithBlueprint('form', {
+        ref: 'b1', type: 'container', element: 'div', name: 'Formulaire', children: [
+          { ref: 'b2', type: 'input', element: 'input', name: 'E-mail' },
+          { ref: 'b3', type: 'action', element: 'button', name: 'Bouton', content: 'Envoyer', config: { actions: [
+            { on: 'click', do: 'validate', target: 'b2', rule: 'email' },
+            { on: 'click', do: 'show', target: 'n1' },
+            { on: 'click', do: 'hide', target: 'dehors' },
+            { on: 'click', do: 'hide', target: 'inconnu' },
+            { on: 'click', do: 'eval', code: 'x' },
+          ] } },
+          { ref: 'n1', type: 'text', element: 'p', name: 'Merci', content: 'Merci !', config: { hidden: 'true' } },
+        ],
+      }, { b1: 'form', b2: 'mail', b3: 'btn' });
+
+      expect(ok).toBe(true);
+      const form = findIn('form')!;
+      expect(form.children!.map(c => c.id).slice(0, 2)).toEqual(['mail', 'btn']);
+      const thanks = form.children![2];
+      expect(thanks.config['hidden']).toBe(true);
+      expect((thanks as any).ref).toBeUndefined();
+      expect(findIn('btn')!.config['actions']).toEqual([
+        { on: 'click', do: 'validate', target: 'mail', rule: 'email' },
+        { on: 'click', do: 'show', target: thanks.id },
+        { on: 'click', do: 'hide', target: 'dehors' },
+      ]);
+    });
+
+    it("retire les actions qui visaient un ancien enfant supprimé par l'IA", () => {
+      service.addWidget(container('form', [input('mail'), button('btn', [{ on: 'click', do: 'hide', target: 'mail' }])]), null, 'page-1');
+      service.replaceWithBlueprint('form', {
+        ref: 'b1', type: 'container', element: 'div', name: 'Formulaire', children: [
+          { ref: 'b3', type: 'action', element: 'button', name: 'Bouton', config: { actions: [{ on: 'click', do: 'hide', target: 'b2' }] } },
+        ],
+      }, { b1: 'form', b2: 'mail', b3: 'btn' });
+      expect(findIn('btn')!.config['actions']).toEqual([]);
+    });
+
+    it('une copie vise ses propres blocs, pas ceux de l\'original', () => {
+      service.addWidget(container('form', [input('mail'), button('btn', [
+        { on: 'click', do: 'validate', target: 'mail', rule: 'required' },
+        { on: 'click', do: 'hide', target: 'ailleurs' },
+      ])]), null, 'page-1');
+      const copy = service.duplicateWidget('form')!;
+      const [copiedInput, copiedButton] = copy.children!;
+      expect(copiedInput.id).not.toBe('mail');
+      expect(copiedButton.config['actions']).toEqual([
+        { on: 'click', do: 'validate', target: copiedInput.id, rule: 'required' },
+        { on: 'click', do: 'hide', target: 'ailleurs' },
+      ]);
+    });
+
+    it("ouvre l'aperçu sur une page de contenu seulement", () => {
+      service.openPreview('ds-page');
+      expect(service.previewPageId()).toBeNull();
+      service.openPreview();
+      expect(service.previewPage()?.id).toBe('page-1');
+      service.closePreview();
+      expect(service.previewPage()).toBeNull();
     });
   });
 });

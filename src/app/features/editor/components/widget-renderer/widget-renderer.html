@@ -5,11 +5,13 @@
   [class.editing]="editing()"
   [class.hovered]="editor.hoveredWidgetId() === widget().id"
   [class.is-container]="widget().children"
+  [class.own-field-frame]="hasOwnFieldFrame()"
+  [class.initially-hidden]="widget().config['hidden'] === true"
   [class.drop-before]="dropPosition() === 'before'"
   [class.drop-after]="dropPosition() === 'after'"
   [class.drop-inside]="dropPosition() === 'inside'"
   [attr.draggable]="!editing()"
-  [attr.title]="isEditable() && !editing() ? 'Double-cliquez pour modifier le texte' : null"
+  [attr.title]="widget().config['hidden'] === true ? 'Masqué au départ : apparaîtra grâce à une interaction' : isEditable() && !editing() ? 'Double-cliquez pour modifier le texte' : null"
   (dragstart)="onDragStart($event)"
   (dragend)="onDragEnd()"
   (dragover)="onDragOver($event)"
@@ -34,6 +36,8 @@
     @switch (widget().element) {
       @case ('h1') { <h1 data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></h1> }
       @case ('h2') { <h2 data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></h2> }
+      @case ('h3') { <h3 data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></h3> }
+      @case ('blockquote') { <blockquote data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></blockquote> }
       @case ('span') { <span data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></span> }
       @case ('a') { <a data-editable href="javascript:void(0)" [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></a> }
       @default { <p data-editable [textContent]="widget().content" [attr.contenteditable]="editing() || null" (blur)="finishEditing($event)" (keydown)="onEditKeydown($event)"></p> }
@@ -69,6 +73,9 @@
         } @else {
           <div class="media-placeholder">🎬 Ajoutez une vidéo dans le panneau de droite</div>
         }
+      }
+      @case ('icon') {
+        <lucide-angular class="icon-render" [img]="icon()" [strokeWidth]="1.5" [absoluteStrokeWidth]="false" aria-hidden="true"></lucide-angular>
       }
       @default { <div class="icon-placeholder">◈</div> }
     }

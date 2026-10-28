@@ -1,0 +1,35 @@
+<section class="ai-edit">
+    <label class="title" [for]="'ai-edit-' + widgetId()">
+        <lucide-angular name="sparkles" class="icon"></lucide-angular>
+        Modifier avec l'IA
+    </label>
+    <div class="input-row">
+        <textarea [id]="'ai-edit-' + widgetId()" rows="2" placeholder="Ex : rends ce bloc plus compact et ajoute un badge « -20 % »"
+            [value]="instruction()" (input)="instruction.set($any($event.target).value)" (keydown)="onKeydown($event)"
+            [disabled]="busy()"></textarea>
+        <button class="send" (click)="submit()" [disabled]="busy() || otherBusy() || !instruction().trim()" title="Envoyer (Entrée)">
+            {{ busy() ? '…' : 'OK' }}
+        </button>
+    </div>
+
+    @if (!busy() && !instruction()) {
+        <div class="suggestions">
+            @for (s of suggestions(); track s) {
+                <button class="chip" (click)="useSuggestion(s)" [disabled]="otherBusy()">{{ s }}</button>
+            }
+        </div>
+    }
+
+    @if (busy()) {
+        <p class="status" role="status">L'IA retravaille ce bloc…</p>
+    }
+    @if (done()) {
+        <p class="status success" role="status">
+            Bloc modifié.
+            <button class="link" (click)="undo()">Annuler</button>
+        </p>
+    }
+    @if (error(); as message) {
+        <p class="status error" role="alert">{{ message }}</p>
+    }
+</section>

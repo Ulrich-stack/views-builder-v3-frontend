@@ -6,12 +6,13 @@ import { DesignSystem } from '../../models/design-sytem.model';
 import { Page } from '../../models/page.model';
 import { GOOGLE_FONTS_URL, THEME_PRESETS } from '../../data/themes.data';
 import { readableOn } from '../../utils/color';
+import { retargetActions, sanitizeActions } from '../../utils/interactions';
 
 export const DS_PAGE_ID = 'ds-page';
 export const STORAGE_KEY = 'views-builder:project:v1';
 export const DS_PAGE_WIDTH = 520;
 
-const DEFAULT_PAGE_WIDTH = 800;
+export const DEFAULT_PAGE_WIDTH = 800;
 const HISTORY_LIMIT = 100;
 // Les modifications successives avec la même clé (glisser un slider, taper un texte,
 // déplacer une page...) sont regroupées en une seule étape d'historique.
@@ -27,6 +28,13 @@ export interface DropTarget {
 interface Snapshot {
   pages: Page[];
   designSystem: DesignSystem;
+}
+
+/** Repères (« ref ») d'un arbre de blocs venu de l'IA, pour retrouver les identifiants et les cibles des actions. */
+interface RefContext {
+  known: Record<string, string>; // ref envoyé à l'IA → identifiant du bloc existant
+  assigned: Map<string, string>; // ref reçu → identifiant final
+  used: Set<string>;
 }
 
 interface WidgetLocation {
@@ -65,6 +73,10 @@ export class EditorService {
 
   // Bloc survolé dans le panneau Calques, mis en évidence sur la page
   hoveredWidgetId = signal<string | null>(null);
+
+  // Page affichée en mode aperçu (sans l'éditeur, interactions actives)
+  previewPageId = signal<string | null>(null);
+  previewPage = computed(() => this.pages().find(p => p.id === this.previewPageId()) ?? null);
 
   private undoStack = signal<Snapshot[]>([]);
   private redoStack = signal<Snapshot[]>([]);
@@ -305,9 +317,21 @@ export class EditorService {
     };
   }
 
+  // APERÇU
+  openPreview(pageId: string | null = this.targetPageId()) {
+    if (!pageId || !this.pages().some(p => p.id === pageId && !p.isDesignSystem)) return;
+    this.previewPageId.set(pageId);
+  }
+
+  closePreview() {
+    this.previewPageId.set(null);
+  }
+
   // MÉTHODE RÉCURSIVE POUR LES BLUEPRINTS
-  private mapBlueprintToWidget(bp: any, label: string): Widget {
-    const id = uuidv4();
+  private mapBlueprintToWidget(bp: any, label: string, refs?: RefContext, forcedId?: string): Widget {
+    const id = forcedId ?? this.idForRef(bp.ref, refs);
+    if (forcedId) refs?.used.add(forcedId);
+    if (refs && typeof bp.ref === 'string') refs.assigned.set(bp.ref, id);
     return {
       id: id,
       type: (bp.children ? 'container' : bp.type) as WidgetType,
@@ -318,9 +342,59 @@ export class EditorService {
       styles: bp.type === 'action' && !bp.children
         ? { ...this.getDefaultStyles({ type: 'action' } as ToolboxItem), ...bp.styles }
         : { ...bp.styles },
-      config: bp.config || {},
-      children: bp.children ? bp.children.map((c: any) => this.mapBlueprintToWidget(c, this.labelFor(c))) : undefined
+      config: this.blueprintConfig(bp.config),
+      children: bp.children ? bp.children.map((c: any) => this.mapBlueprintToWidget(c, this.labelFor(c), refs)) : undefined
     };
+  }
+
+  /** Garde l'identifiant d'un bloc existant si l'IA a recopié son repère, sinon en crée un. */
+  private idForRef(ref: unknown, refs?: RefContext): string {
+    const known = refs && typeof ref === 'string' ? refs.known[ref] : undefined;
+    if (known && !refs!.used.has(known)) {
+      refs!.used.add(known);
+      return known;
+    }
+    return uuidv4();
+  }
+
+  /** Les actions et la visibilité venues de l'extérieur sont revérifiées (liste blanche). */
+  private blueprintConfig(config: any): Record<string, any> {
+    const clean: Record<string, any> = { ...(config || {}) };
+    if ('actions' in clean) {
+      const actions = sanitizeActions(clean['actions']);
+      if (actions.length) clean['actions'] = actions;
+      else delete clean['actions'];
+    }
+    if ('hidden' in clean) {
+      if (clean['hidden'] === true || clean['hidden'] === 'true') clean['hidden'] = true;
+      else delete clean['hidden'];
+    }
+    return clean;
+  }
+
+  /**
+   * Transforme des blocs venus de l'IA en widgets : les repères sont convertis en identifiants,
+   * et les actions dont la cible n'existe pas sont retirées.
+   * @param stale identifiants qui vont disparaître (ancienne version du bloc modifié)
+   */
+  private materialize(
+    blueprints: any[],
+    labelOf: (bp: any) => string,
+    known: Record<string, string> = {},
+    forcedRootId?: string,
+    stale: Set<string> = new Set()
+  ): Widget[] {
+    const refs: RefContext = { known, assigned: new Map(), used: new Set() };
+    const widgets = blueprints.map((bp, i) => this.mapBlueprintToWidget(bp, labelOf(bp), refs, i === 0 ? forcedRootId : undefined));
+    const created = new Set<string>();
+    const collect = (w: Widget) => { created.add(w.id); w.children?.forEach(collect); };
+    widgets.forEach(collect);
+    const resolve = (target: string): string | null => {
+      const id = refs.assigned.get(target) ?? target;
+      if (created.has(id)) return id;
+      return !stale.has(id) && this.findWidgetInPages(this.pages(), id) ? id : null;
+    };
+    return widgets.map(w => retargetActions(w, resolve));
   }
 
   private labelFor(bp: any): string {
@@ -350,14 +424,60 @@ export class EditorService {
         this.addWidget(widget, location.parentId, location.pageId, location.index + 1);
       }
     } else {
-      const pageId = this.selectedPage() && !this.selectedPage()!.isDesignSystem
-        ? this.selectedPageId()
-        : this.pages().find(p => !p.isDesignSystem)?.id ?? null;
+      const pageId = this.targetPageId();
       if (!pageId) return null;
       this.addWidget(widget, null, pageId);
     }
     this.selectWidget(widget.id);
     return widget;
+  }
+
+  /** Page qui reçoit les ajouts : la page sélectionnée, sinon la première page de contenu. */
+  targetPageId(): string | null {
+    const page = this.selectedPage();
+    return page && !page.isDesignSystem
+      ? page.id
+      : this.pages().find(p => !p.isDesignSystem)?.id ?? null;
+  }
+
+  /**
+   * Ajoute à la fin de la page les sections générées par l'IA, en une seule étape d'historique
+   * (un seul « Annuler » retire toute la génération). Renvoie le nombre de sections ajoutées.
+   */
+  addGeneratedWidgets(
+    blueprints: any[],
+    pageId: string | null = this.targetPageId(),
+    options: { continueStep?: boolean; select?: boolean } = {}
+  ): number {
+    if (!pageId || !blueprints.length) return 0;
+    const widgets = this.materialize(blueprints, bp => bp.children ? 'Section' : this.labelFor(bp));
+    // En génération en direct, les sections suivantes rejoignent l'étape d'historique de la première
+    if (!options.continueStep) this.checkpoint();
+    this.pages.update(pages =>
+      widgets.reduce((acc, widget) => this.insertInPages(acc, widget, pageId, null) ?? acc, pages)
+    );
+    if (options.select !== false) {
+      this.selectedPageId.set(pageId);
+      this.selectWidget(widgets[0].id);
+    }
+    return widgets.length;
+  }
+
+  /**
+   * Remplace un bloc par sa version modifiée par l'IA, en une étape annulable.
+   * Le bloc garde son identifiant pour rester sélectionné ; ses enfants gardent le leur quand l'IA
+   * a recopié leur repère (`refs` : repère → identifiant), ce qui préserve les cibles des actions.
+   */
+  replaceWithBlueprint(widgetId: string, blueprint: any, refs: Record<string, string> = {}): boolean {
+    const current = this.findWidgetInPages(this.pages(), widgetId);
+    if (!current) return false;
+    const stale = new Set<string>();
+    const collect = (w: Widget) => { stale.add(w.id); w.children?.forEach(collect); };
+    collect(current);
+    const [replacement] = this.materialize([blueprint], () => current.name, refs, widgetId, stale);
+    this.checkpoint();
+    this.pages.update(pages => this.mapWidgetInPages(pages, widgetId, () => replacement));
+    return true;
   }
 
   /** Chemin du bloc sélectionné, du plus haut parent jusqu'à lui (fil d'Ariane). */
@@ -651,12 +771,16 @@ export class EditorService {
       }));
   }
 
+  /** Copie avec de nouveaux identifiants ; les actions qui visent un bloc de la copie suivent la copie. */
   private cloneWithNewIds(widget: Widget): Widget {
-    return {
-      ...structuredClone(widget),
-      id: uuidv4(),
-      children: widget.children?.map(c => this.cloneWithNewIds(c))
+    const ids = new Map<string, string>();
+    const clone = (w: Widget): Widget => {
+      const id = uuidv4();
+      ids.set(w.id, id);
+      return { ...structuredClone(w), id, children: w.children?.map(clone) };
     };
+    const copy = clone(widget);
+    return retargetActions(copy, target => ids.get(target) ?? target);
   }
 
   private getDefaultContent(item: ToolboxItem): string {
@@ -670,6 +794,7 @@ export class EditorService {
   private getDefaultConfig(item: ToolboxItem): Record<string, any> {
     switch (item.element) {
       case 'img': return { src: '', alt: '' };
+      case 'icon': return { icon: 'sparkles' };
       case 'a': return { href: '' };
       case 'input':
       case 'textarea': return { placeholder: 'Votre réponse...' };
@@ -704,6 +829,7 @@ export class EditorService {
       };
     }
 
+    if (item.type === 'media' && item.element === 'icon') return { 'width': '40px', 'height': '40px', 'color': 'var(--primary)' };
     if (item.type === 'media') return { ...base, 'padding': '0', 'border-radius': 'var(--radius-main)', 'overflow': 'hidden' };
 
     if (item.type === 'action') {

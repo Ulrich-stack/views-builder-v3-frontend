@@ -6,6 +6,9 @@
         <button class="tab" [class.active]="tab() === 'layers'" (click)="tab.set('layers')">
             <lucide-angular name="layers" class="tab-icon"></lucide-angular> Calques
         </button>
+        <button class="tab" [class.active]="tab() === 'ai'" (click)="tab.set('ai')">
+            <lucide-angular name="sparkles" class="tab-icon"></lucide-angular> IA
+        </button>
     </nav>
 
     @if (tab() === 'add') {
@@ -124,6 +127,8 @@
                 </div>
             }
         </div>
+    } @else if (tab() === 'ai') {
+        <app-ai-generator></app-ai-generator>
     } @else {
         <app-layers></app-layers>
     }

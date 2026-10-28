@@ -1,0 +1,360 @@
+:host {
+    display: block;
+    overflow-y: auto;
+}
+
+.ai-generator {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 14px 12px;
+}
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.block.audit {
+    padding-top: 18px;
+    border-top: 1px solid var(--sidebar-border);
+}
+
+.block-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.block-title h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.hint {
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: var(--text-second);
+}
+
+.field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 110px;
+    background-color: var(--item-bg);
+    border: 1px solid var(--sidebar-border);
+    border-radius: 8px;
+    padding: 0.6rem 0.7rem;
+    color: white;
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+textarea:focus {
+    border-color: var(--accent);
+}
+
+textarea:disabled {
+    opacity: 0.6;
+}
+
+.examples {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.example {
+    text-align: left;
+    background: transparent;
+    border: 1px solid var(--sidebar-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--text-second);
+    font-family: inherit;
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.example:hover {
+    color: var(--text-main);
+    border-color: var(--text-second);
+}
+
+.context {
+    font-size: 0.75rem;
+    color: var(--text-second);
+}
+
+.context strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.generate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s, opacity 0.15s;
+}
+
+.generate:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.generate:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.generate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.generate-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.shortcut {
+    margin-top: -4px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-second);
+}
+
+.status {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-second);
+}
+
+.status.error {
+    color: #f87171;
+}
+
+.status.success {
+    color: #4ade80;
+}
+
+.generate.stop {
+    background-color: var(--item-bg);
+    border: 1px solid var(--sidebar-border);
+}
+
+.small-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* --- Capture d'écran --- */
+.attach-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px dashed var(--sidebar-border);
+    border-radius: 6px;
+    color: var(--text-second);
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.attach-btn:hover,
+.attach-btn:focus-within {
+    color: var(--text-main);
+    border-color: var(--text-second);
+}
+
+.attach-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.attach-btn input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.attachment {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    background-color: var(--item-bg);
+    border: 1px solid var(--sidebar-border);
+    border-radius: 8px;
+}
+
+.attachment img {
+    width: 48px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.attachment-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.attachment-name {
+    font-size: 0.76rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attachment-hint {
+    font-size: 0.7rem;
+    color: var(--text-second);
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-second);
+    cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+    color: var(--text-main);
+    background-color: var(--item-hover);
+}
+
+/* --- Audit --- */
+.secondary-btn {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    background-color: var(--item-bg);
+    border: 1px solid var(--sidebar-border);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background-color: var(--item-hover);
+}
+
+.secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.issues {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.issue {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: var(--item-bg);
+    border-radius: 6px;
+}
+
+.issue-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    cursor: pointer;
+}
+
+.issue-ratio {
+    font-size: 0.7rem;
+    color: #f87171;
+    font-variant-numeric: tabular-nums;
+}
+
+.swatch {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--sidebar-border);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.issue-more {
+    color: var(--text-second);
+}
+
+/* Choix des couleurs par l'IA */
+.colors-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.colors-toggle input {
+  accent-color: var(--accent);
+}
+
+.colors-toggle.disabled {
+  opacity: 0.5;
+  cursor: default;
+}

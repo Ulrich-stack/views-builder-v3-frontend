@@ -2,12 +2,14 @@ import { Component, computed, ElementRef, inject, input, signal } from '@angular
 import { Widget } from '../../../../../core/models/widget.model';
 import { DropPosition, EditorService } from '../../../../../core/services/EditorService/editor-service';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule } from 'lucide-angular';
+import { iconData } from '../../../../../core/data/icons.data';
 
 export const DRAG_DATA_TYPE = 'widget-item';
 
 @Component({
   selector: 'app-widget-renderer',
-  imports: [CommonModule, WidgetRenderer],
+  imports: [CommonModule, WidgetRenderer, LucideAngularModule],
   templateUrl: './widget-renderer.html',
   styleUrl: './widget-renderer.css',
 })
@@ -21,6 +23,15 @@ export class WidgetRenderer {
   editing = signal(false);
 
   isEditable = computed(() => ['text', 'action'].includes(this.widget().type));
+
+  /** Dessin de l'icône choisie (bloc média « icon »), ou d'une icône par défaut si le nom est inconnu. */
+  icon = computed(() => iconData(this.widget().config?.['icon']));
+
+  /** Champ de formulaire dont le bloc porte déjà son propre cadre (bordure ou fond) : le champ intérieur s'efface. */
+  hasOwnFieldFrame = computed(() => {
+    const w = this.widget();
+    return w.type === 'input' && Object.keys(w.styles).some(k => k.startsWith('border') || k.startsWith('background'));
+  });
 
   dropPosition = computed<DropPosition | null>(() => {
     const target = this.editor.dropTarget();

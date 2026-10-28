@@ -4,6 +4,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { NgTemplateOutlet } from '@angular/common';
 import { DS_PAGE_ID, EditorService } from '../../../../../core/services/EditorService/editor-service';
 import { Widget } from '../../../../../core/models/widget.model';
+import { AiEditBox } from '../ai-edit-box/ai-edit-box';
+import { ICON_NAMES, ICONS } from '../../../../../core/data/icons.data';
+import { ActionsEditor } from '../actions-editor/actions-editor';
 
 export interface Preset {
   label: string;
@@ -29,7 +32,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-properties',
-  imports: [FormsModule, LucideAngularModule, NgTemplateOutlet],
+  imports: [FormsModule, LucideAngularModule, NgTemplateOutlet, AiEditBox, ActionsEditor],
   templateUrl: './properties.html',
   styleUrl: './properties.css',
 })
@@ -183,6 +186,9 @@ export class Properties {
     { label: 'Étroit', value: '480px' },
     { label: 'Moyen', value: '720px' },
   ];
+
+  /** Icônes proposées pour le bloc « Icône » */
+  readonly icons = ICON_NAMES.map(name => ({ name, data: ICONS[name] }));
 
   readonly imageHeights: Preset[] = [
     { label: 'Auto', value: null },

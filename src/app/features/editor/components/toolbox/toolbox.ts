@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { EditorService } from '../../../../../core/services/EditorService/editor-service';
 import { DRAG_DATA_TYPE } from '../widget-renderer/widget-renderer';
 import { Layers } from '../layers/layers';
+import { AiGenerator } from '../ai-generator/ai-generator';
 
 /** Minuscules sans accents, pour une recherche tolérante. */
 function normalize(text: string): string {
@@ -13,7 +14,7 @@ function normalize(text: string): string {
 
 @Component({
   selector: 'app-toolbox',
-  imports: [CommonModule, LucideAngularModule, Layers],
+  imports: [CommonModule, LucideAngularModule, Layers, AiGenerator],
   templateUrl: './toolbox.html',
   styleUrl: './toolbox.css',
 })
@@ -22,7 +23,7 @@ export class Toolbox {
 
   readonly blueprintCategory = BLUEPRINT_CATEGORY;
 
-  tab = signal<'add' | 'layers'>('add');
+  tab = signal<'add' | 'layers' | 'ai'>('add');
   search = signal('');
   collapsed = signal<Set<string>>(new Set());
 

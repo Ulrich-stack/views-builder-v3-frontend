@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/editor/components/ai-generator/ai-generator.html"
+        ],
+        "createdAt": "2026-10-17T19:11:19.536Z",
+        "reason": "Claude: src lié dynamiquement par Angular ([src]=\"img.preview\"), miniature de la capture importée"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/editor/components/widget-renderer/widget-renderer.html"
+        ],
+        "createdAt": "2026-10-18T07:11:12.829Z",
+        "reason": "agent: Angular [src] binding guarded by @if (src) in the pre-existing renderer template, not a broken image"
+      }
+    ]
+  }
+}

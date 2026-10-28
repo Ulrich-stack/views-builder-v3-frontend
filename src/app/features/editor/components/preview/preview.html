@@ -1,0 +1,24 @@
+@if (page(); as p) {
+<div class="preview" role="dialog" aria-modal="true" [attr.aria-label]="'Aperçu de « ' + p.name + ' »'">
+  <header class="bar">
+    <span class="title"><span class="badge">Aperçu</span>{{ p.name }}</span>
+
+    <div class="devices" role="group" aria-label="Taille d'écran">
+      <button [class.active]="device() === 'desktop'" [attr.aria-pressed]="device() === 'desktop'"
+        (click)="device.set('desktop')">Ordinateur</button>
+      <button [class.active]="device() === 'mobile'" [attr.aria-pressed]="device() === 'mobile'"
+        (click)="device.set('mobile')">Mobile</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn" (click)="reload()" title="Remettre la page dans son état de départ">↻ Recommencer</button>
+      <button class="btn primary" (click)="close()" title="Revenir à l'éditeur (Échap)">Quitter l'aperçu</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <iframe class="frame" [class.mobile]="device() === 'mobile'" [title]="'Aperçu de ' + p.name"
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" [srcdoc]="html()"></iframe>
+  </div>
+</div>
+}

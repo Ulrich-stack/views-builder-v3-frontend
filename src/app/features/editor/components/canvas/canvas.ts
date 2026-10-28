@@ -5,6 +5,7 @@ import { DRAG_DATA_TYPE, WidgetRenderer } from '../widget-renderer/widget-render
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Page } from '../../../../../core/models/page.model';
+import { exportFileName, exportPageHtml } from '../../../../../core/utils/export-html';
 
 @Component({
   selector: 'app-canvas',
@@ -279,7 +280,8 @@ export class Canvas {
     const isTyping = !!target && (
       ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable
     );
-    if (isTyping) return;
+    // En aperçu, l'éditeur ne réagit plus au clavier (Suppr effacerait le bloc sélectionné)
+    if (isTyping || this.editor.previewPageId()) return;
 
     const mod = event.ctrlKey || event.metaKey;
     const key = event.key.toLowerCase();
@@ -331,10 +333,33 @@ export class Canvas {
       this.editor.removeWidget(selected);
     } else if (event.key === 'Escape') {
       this.editor.selectWidget(null);
+    } else if (!mod && !event.shiftKey && !event.altKey && key === 'p') {
+      event.preventDefault();
+      this.editor.openPreview();
     }
   }
 
   // PAGES
+  /** Page exportée : la page sélectionnée, sinon la première page de contenu. */
+  exportablePage = computed(() => {
+    const id = this.editor.targetPageId();
+    return this.editor.pages().find(p => p.id === id) ?? null;
+  });
+
+  /** Télécharge la page en fichier HTML autonome. */
+  exportPage() {
+    const page = this.exportablePage();
+    if (!page) return;
+    const html = exportPageHtml(page, this.editor.globalVariables());
+    const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = exportFileName(page);
+    link.click();
+    // Laisse au navigateur le temps de démarrer le téléchargement
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   addPage() {
     const page = this.editor.addPage();
     // On attend que la page soit affichée pour connaître sa taille

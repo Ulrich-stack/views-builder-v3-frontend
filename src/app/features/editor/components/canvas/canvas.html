@@ -68,6 +68,11 @@
     <button class="toolbar-btn" (click)="editor.undo()" [disabled]="!editor.canUndo()" title="Annuler (Ctrl+Z)">↶ Annuler</button>
     <button class="toolbar-btn" (click)="editor.redo()" [disabled]="!editor.canRedo()" title="Rétablir (Ctrl+Y)">↷ Rétablir</button>
     <span class="toolbar-separator"></span>
+    <button class="toolbar-btn" (click)="editor.openPreview()" [disabled]="!exportablePage()"
+      [title]="exportablePage() ? 'Voir « ' + exportablePage()!.name + ' » sans l’éditeur et tester ses interactions (P)' : 'Aucune page à prévisualiser'">▶ Aperçu</button>
+    <button class="toolbar-btn" (click)="exportPage()" [disabled]="!exportablePage()?.widgets?.length"
+      [title]="exportablePage() ? 'Télécharger « ' + exportablePage()!.name + ' » en fichier HTML' : 'Aucune page à exporter'">⤓ Exporter</button>
+    <span class="toolbar-separator"></span>
     <span class="save-status" title="Vos modifications sont enregistrées automatiquement dans ce navigateur">✓ Enregistré</span>
   </div>
 
