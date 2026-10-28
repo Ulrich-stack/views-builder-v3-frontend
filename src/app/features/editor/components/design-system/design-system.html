@@ -39,7 +39,7 @@
         <label class="seed-color" [style.background]="seedColor()" title="Choisir votre couleur">
           <input type="color" [ngModel]="seedColor()" (ngModelChange)="seedColor.set($event)">
         </label>
-        <div class="segmented small">
+        <div class="ui-segmented small">
           <button [class.active]="seedMode() === 'light'" (click)="seedMode.set('light')">☀️ Clair</button>
           <button [class.active]="seedMode() === 'dark'" (click)="seedMode.set('dark')">🌙 Sombre</button>
         </div>
@@ -130,8 +130,8 @@
       </div>
     }
 
-    <span class="field-label">Taille du texte</span>
-    <div class="segmented">
+    <span class="ui-label">Taille du texte</span>
+    <div class="ui-segmented">
       @for (s of textSizes; track s.value) {
         <button [class.active]="ds().typography.sizeBase === s.value" (click)="setNumber('typography.sizeBase', s.value)">
           <span [style.font-size.px]="s.value - 2">{{ s.label }}</span>
@@ -147,7 +147,7 @@
       <h4>Formes et espacements</h4>
     </div>
 
-    <span class="field-label">Coins des boutons et des cartes</span>
+    <span class="ui-label">Coins des boutons et des cartes</span>
     <div class="shape-grid">
       @for (r of radiuses; track r.value) {
         <button class="shape" [class.active]="ds().spacing.radius === r.value" (click)="setNumber('spacing.radius', r.value)">
@@ -157,8 +157,8 @@
       }
     </div>
 
-    <span class="field-label">Espace à l'intérieur des blocs</span>
-    <div class="segmented">
+    <span class="ui-label">Espace à l'intérieur des blocs</span>
+    <div class="ui-segmented">
       @for (s of spacings; track s.value) {
         <button [class.active]="ds().spacing.padding === s.value" (click)="setNumber('spacing.padding', s.value)">{{ s.label }}</button>
       }

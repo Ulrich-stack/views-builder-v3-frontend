@@ -2,15 +2,15 @@
   <input type="checkbox" [checked]="hidden()" (change)="setHidden($any($event.target).checked)">
   Masqué au départ
 </label>
-<p class="hint">Le bloc reste visible ici, estompé ; une action « Afficher » le fera apparaître.</p>
+<p class="ui-hint">Le bloc reste visible ici, estompé ; une action « Afficher » le fera apparaître.</p>
 
-<p class="field-label">Quand on clique sur ce bloc</p>
+<p class="ui-label">Quand on clique sur ce bloc</p>
 
 @for (action of actions(); track $index; let i = $index, first = $first, last = $last) {
   <div class="action">
     <div class="action-head">
       <span class="step">{{ i + 1 }}</span>
-      <select class="field" [attr.aria-label]="'Action ' + (i + 1)" (change)="setKind(i, $any($event.target).value)">
+      <select class="ui-field" [attr.aria-label]="'Action ' + (i + 1)" (change)="setKind(i, $any($event.target).value)">
         @for (k of kinds; track k.kind) {
           <option [value]="k.kind" [selected]="k.kind === action.do">{{ k.label }}</option>
         }
@@ -21,7 +21,7 @@
     </div>
 
     @if (needsTarget(action.do)) {
-      <select class="field" [attr.aria-label]="action.do === 'validate' ? 'Champ à vérifier' : 'Bloc visé'"
+      <select class="ui-field" [attr.aria-label]="action.do === 'validate' ? 'Champ à vérifier' : 'Bloc visé'"
         (change)="setTarget(i, $any($event.target).value)">
         <option value="" disabled [selected]="!action.target">{{ action.do === 'validate' ? 'Champ…' : 'Bloc…' }}</option>
         @for (t of targetsFor(action); track t.id) {
@@ -36,23 +36,23 @@
     @if (action.do === 'validate') {
       <div class="row">
         <span class="inline-label">Doit être</span>
-        <select class="field" aria-label="Règle de vérification" (change)="setRule(i, $any($event.target).value)">
+        <select class="ui-field" aria-label="Règle de vérification" (change)="setRule(i, $any($event.target).value)">
           @for (r of rules; track r.rule) {
             <option [value]="r.rule" [selected]="r.rule === (action.rule ?? 'required')">{{ r.label }}</option>
           }
         </select>
       </div>
-      <input class="field" type="text" placeholder="Message d'erreur (facultatif)" aria-label="Message d'erreur"
+      <input class="ui-field" type="text" placeholder="Message d'erreur (facultatif)" aria-label="Message d'erreur"
         [value]="action.message ?? ''" (input)="setMessage(i, $any($event.target).value)">
     }
 
     @if (action.do === 'toast') {
-      <input class="field" type="text" placeholder="Message affiché" aria-label="Message affiché"
+      <input class="ui-field" type="text" placeholder="Message affiché" aria-label="Message affiché"
         [value]="action.message ?? ''" (input)="setMessage(i, $any($event.target).value)">
     }
 
     @if (action.do === 'link') {
-      <input class="field" type="url" placeholder="https://..." aria-label="Adresse du lien"
+      <input class="ui-field" type="url" placeholder="https://..." aria-label="Adresse du lien"
         [value]="action.url ?? ''" (input)="setUrl(i, $any($event.target).value)">
       <label class="check">
         <input type="checkbox" [checked]="!!action.newTab" (change)="setNewTab(i, $any($event.target).checked)">
@@ -61,15 +61,15 @@
     }
   </div>
 } @empty {
-  <p class="hint">Aucune action. Exemple : vérifier l'e-mail, afficher un message de confirmation, masquer le formulaire.</p>
+  <p class="ui-hint">Aucune action. Exemple : vérifier l'e-mail, afficher un message de confirmation, masquer le formulaire.</p>
 }
 
 @if (actions().length < maxActions) {
   <button class="add" (click)="add()">＋ Ajouter une action</button>
 }
 @if (actions().length > 1) {
-  <p class="hint">Les actions s'enchaînent dans l'ordre ; si une vérification échoue, la suite n'est pas exécutée.</p>
+  <p class="ui-hint">Les actions s'enchaînent dans l'ordre ; si une vérification échoue, la suite n'est pas exécutée.</p>
 }
 @if (actions().length) {
-  <p class="hint">Testez-les avec ▶ Aperçu.</p>
+  <p class="ui-hint">Testez-les avec ▶ Aperçu.</p>
 }

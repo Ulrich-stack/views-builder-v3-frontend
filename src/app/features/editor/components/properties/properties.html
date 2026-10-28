@@ -1,5 +1,5 @@
 <ng-template #presetRow let-presets let-prop="prop">
-  <div class="segmented">
+  <div class="ui-segmented">
     @for (p of presets; track p.label) {
       <button [class.active]="isActive(prop, p.value)" [title]="p.hint ?? p.label" (click)="setStyle(prop, p.value)">{{ p.label }}</button>
     }
@@ -37,16 +37,16 @@
         </div>
 
         <div class="action-row">
-          <button class="icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">
+          <button class="ui-icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">
             <lucide-angular name="arrow-up" class="icon"></lucide-angular>
           </button>
-          <button class="icon-btn" (click)="moveBy(w, 1)" [disabled]="!canMoveBy(w, 1)" title="Descendre">
+          <button class="ui-icon-btn" (click)="moveBy(w, 1)" [disabled]="!canMoveBy(w, 1)" title="Descendre">
             <lucide-angular name="arrow-down" class="icon"></lucide-angular>
           </button>
-          <button class="icon-btn" (click)="editor.duplicateWidget(w.id)" title="Dupliquer (Ctrl+D)">
+          <button class="ui-icon-btn" (click)="editor.duplicateWidget(w.id)" title="Dupliquer (Ctrl+D)">
             <lucide-angular name="copy" class="icon"></lucide-angular>
           </button>
-          <button class="icon-btn danger" (click)="editor.removeWidget(w.id)" title="Supprimer (Suppr)">
+          <button class="ui-icon-btn danger" (click)="editor.removeWidget(w.id)" title="Supprimer (Suppr)">
             <lucide-angular name="trash-2" class="icon"></lucide-angular>
           </button>
         </div>
@@ -66,28 +66,28 @@
           @if (isOpen('content')) {
             <div class="group-body">
               @if (hasText()) {
-                <textarea class="field" rows="3" [ngModel]="w.content" (ngModelChange)="setContent($event)"></textarea>
-                <p class="hint">💡 Vous pouvez aussi double-cliquer sur le texte dans la page.</p>
+                <textarea class="ui-field" rows="3" [ngModel]="w.content" (ngModelChange)="setContent($event)"></textarea>
+                <p class="ui-hint">💡 Vous pouvez aussi double-cliquer sur le texte dans la page.</p>
                 @if (w.element === 'a' || w.type === 'action') {
-                  <label class="field-label">Lien (quand on clique)</label>
-                  <input class="field" type="url" placeholder="https://..." [ngModel]="config('href')" (ngModelChange)="setConfig('href', $event)">
+                  <label class="ui-label">Lien (quand on clique)</label>
+                  <input class="ui-field" type="url" placeholder="https://..." [ngModel]="config('href')" (ngModelChange)="setConfig('href', $event)">
                 }
               }
 
               @if (w.element === 'img' || w.element === 'video') {
-                <label class="field-label">Adresse web (URL)</label>
-                <input class="field" type="url" placeholder="https://..." [ngModel]="config('src')" (ngModelChange)="setConfig('src', $event)">
+                <label class="ui-label">Adresse web (URL)</label>
+                <input class="ui-field" type="url" placeholder="https://..." [ngModel]="config('src')" (ngModelChange)="setConfig('src', $event)">
                 @if (w.element === 'img') {
-                  <button class="secondary-btn" (click)="useSampleImage()">🎲 Image d'exemple</button>
-                  <label class="field-label">Description (pour l'accessibilité)</label>
-                  <input class="field" type="text" placeholder="Ex : Photo de l'équipe" [ngModel]="config('alt')" (ngModelChange)="setConfig('alt', $event)">
-                  <label class="field-label">Hauteur</label>
+                  <button class="ui-btn" (click)="useSampleImage()">🎲 Image d'exemple</button>
+                  <label class="ui-label">Description (pour l'accessibilité)</label>
+                  <input class="ui-field" type="text" placeholder="Ex : Photo de l'équipe" [ngModel]="config('alt')" (ngModelChange)="setConfig('alt', $event)">
+                  <label class="ui-label">Hauteur</label>
                   <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: imageHeights, prop: 'height' }"></ng-container>
                 }
               }
 
               @if (w.element === 'icon') {
-                <label class="field-label">Pictogramme</label>
+                <label class="ui-label">Pictogramme</label>
                 <div class="icon-picker" role="listbox" aria-label="Pictogramme">
                   @for (icon of icons; track icon.name) {
                     <button type="button" class="icon-choice" role="option" [title]="icon.name"
@@ -101,11 +101,11 @@
 
               @if (w.type === 'input') {
                 @if (w.element === 'checkbox') {
-                  <label class="field-label">Texte à côté de la case</label>
-                  <input class="field" type="text" [ngModel]="config('label')" (ngModelChange)="setConfig('label', $event)">
+                  <label class="ui-label">Texte à côté de la case</label>
+                  <input class="ui-field" type="text" [ngModel]="config('label')" (ngModelChange)="setConfig('label', $event)">
                 } @else {
-                  <label class="field-label">Texte d'exemple dans le champ</label>
-                  <input class="field" type="text" [ngModel]="config('placeholder') || w.name" (ngModelChange)="setConfig('placeholder', $event)">
+                  <label class="ui-label">Texte d'exemple dans le champ</label>
+                  <input class="ui-field" type="text" [ngModel]="config('placeholder') || w.name" (ngModelChange)="setConfig('placeholder', $event)">
                 }
               }
             </div>
@@ -153,8 +153,8 @@
               </div>
 
               @if (layout() === 'grid') {
-                <label class="field-label">Nombre de colonnes</label>
-                <div class="segmented">
+                <label class="ui-label">Nombre de colonnes</label>
+                <div class="ui-segmented">
                   @for (n of [1, 2, 3, 4]; track n) {
                     <button [class.active]="gridColumns() === n" (click)="setGridColumns(n)">{{ n }}</button>
                   }
@@ -162,12 +162,12 @@
               }
 
               @if (layout() !== 'free') {
-                <label class="field-label">Espace entre les éléments</label>
+                <label class="ui-label">Espace entre les éléments</label>
                 <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: gaps, prop: 'gap' }"></ng-container>
               }
 
               @if (layout() === 'column' || layout() === 'row') {
-                <label class="field-label">Alignement</label>
+                <label class="ui-label">Alignement</label>
                 <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: alignItems, prop: 'align-items' }"></ng-container>
               }
             </div>
@@ -185,21 +185,21 @@
           </button>
           @if (isOpen('text')) {
             <div class="group-body">
-              <label class="field-label">Taille</label>
+              <label class="ui-label">Taille</label>
               <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: fontSizes, prop: 'font-size' }"></ng-container>
 
               <div class="split">
                 <div>
-                  <label class="field-label">Épaisseur</label>
+                  <label class="ui-label">Épaisseur</label>
                   <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: fontWeights, prop: 'font-weight' }"></ng-container>
                 </div>
                 <div>
-                  <label class="field-label">Alignement</label>
+                  <label class="ui-label">Alignement</label>
                   <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: textAligns, prop: 'text-align' }"></ng-container>
                 </div>
               </div>
 
-              <label class="field-label">Couleur</label>
+              <label class="ui-label">Couleur</label>
               <div class="swatches">
                 @for (s of textColors; track s.label) {
                   <button class="swatch" [class.active]="isActive('color', s.value)" [title]="s.label"
@@ -223,7 +223,7 @@
         </button>
         @if (isOpen('look')) {
           <div class="group-body">
-            <label class="field-label">Fond</label>
+            <label class="ui-label">Fond</label>
             <div class="swatches">
               @for (s of backgrounds; track s.label) {
                 <button class="swatch" [class.none]="!s.value" [class.active]="isActive('background-color', s.value)" [title]="s.label"
@@ -234,8 +234,8 @@
               </label>
             </div>
 
-            <label class="field-label">Coins</label>
-            <div class="segmented">
+            <label class="ui-label">Coins</label>
+            <div class="ui-segmented">
               @for (p of radiuses; track p.label) {
                 <button [class.active]="isActive('border-radius', p.value)" (click)="setStyle('border-radius', p.value)">
                   <span class="radius-dot" [style.border-radius]="p.value === '999px' ? '999px' : p.value === '24px' ? '6px' : p.value === '0' ? '0' : '3px'"></span>{{ p.label }}
@@ -243,10 +243,10 @@
               }
             </div>
 
-            <label class="field-label">Bordure</label>
+            <label class="ui-label">Bordure</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: borders, prop: 'border' }"></ng-container>
 
-            <label class="field-label">Ombre</label>
+            <label class="ui-label">Ombre</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: shadows, prop: 'box-shadow' }"></ng-container>
           </div>
         }
@@ -266,25 +266,25 @@
               <div class="inner-box"><span>Espace intérieur</span></div>
             </div>
 
-            <label class="field-label">Espace intérieur</label>
+            <label class="ui-label">Espace intérieur</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: paddings, prop: 'padding' }"></ng-container>
 
-            <label class="field-label">Espace autour (au-dessus et en dessous)</label>
+            <label class="ui-label">Espace autour (au-dessus et en dessous)</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: margins, prop: 'margin' }"></ng-container>
 
-            <label class="field-label">Largeur</label>
+            <label class="ui-label">Largeur</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: widths, prop: 'width' }"></ng-container>
 
-            <label class="field-label">Largeur maximum</label>
+            <label class="ui-label">Largeur maximum</label>
             <ng-container *ngTemplateOutlet="presetRow; context: { $implicit: maxWidths, prop: 'max-width' }"></ng-container>
 
-            <label class="field-label">Position du bloc</label>
-            <div class="segmented">
+            <label class="ui-label">Position du bloc</label>
+            <div class="ui-segmented">
               <button [class.active]="blockPosition() === 'left'" (click)="setBlockPosition('left')">À gauche</button>
               <button [class.active]="blockPosition() === 'center'" (click)="setBlockPosition('center')">Centré</button>
               <button [class.active]="blockPosition() === 'right'" (click)="setBlockPosition('right')">À droite</button>
             </div>
-            <p class="hint">Le centrage se voit quand la largeur n'est pas « Pleine largeur ».</p>
+            <p class="ui-hint">Le centrage se voit quand la largeur n'est pas « Pleine largeur ».</p>
           </div>
         }
       </section>
@@ -310,12 +310,12 @@
           <span>Taille d'écran</span>
         </div>
         <div class="group-body">
-          <div class="segmented">
+          <div class="ui-segmented">
             @for (w of pageWidths; track w.label) {
               <button [class.active]="isPageWidth(w.value)" (click)="setPageWidth(w.value)">{{ w.label }}</button>
             }
           </div>
-          <p class="hint">Vous pouvez aussi tirer le coin en bas à droite de la page.</p>
+          <p class="ui-hint">Vous pouvez aussi tirer le coin en bas à droite de la page.</p>
         </div>
       </section>
 

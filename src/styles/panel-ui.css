@@ -1,0 +1,161 @@
+/*
+ * Contrôles communs aux panneaux de l'éditeur (Propriétés, Interactions, IA, Design System).
+ * Écrits une seule fois ici : un panneau ne garde dans son CSS que sa mise en page (marges, flex...).
+ */
+
+/* Libellé au-dessus d'un champ ou d'un groupe de choix */
+.ui-label {
+  font-size: 0.72rem;
+  color: var(--text-second);
+  margin-top: 6px;
+}
+
+/* Champ de saisie (input, textarea, select) */
+.ui-field {
+  width: 100%;
+  min-width: 0;
+  background-color: var(--item-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.8rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+textarea.ui-field {
+  resize: vertical;
+}
+
+.ui-field:focus {
+  border-color: var(--accent);
+}
+
+/* Petite phrase d'aide sous un champ */
+.ui-hint {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-second);
+}
+
+/* Bouton secondaire : action utile mais pas principale */
+.ui-btn {
+  padding: 7px 10px;
+  background-color: var(--item-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.ui-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background-color: var(--item-hover);
+}
+
+.ui-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton icône encadré (monter, dupliquer, supprimer...) */
+.ui-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 0;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ui-icon-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--item-hover);
+}
+
+.ui-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.ui-icon-btn.danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger-text);
+}
+
+/* Bouton icône discret, sans cadre (fermer, retirer) */
+.ui-icon-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-second);
+  cursor: pointer;
+}
+
+.ui-icon-btn-ghost:hover:not(:disabled) {
+  color: var(--text-main);
+  background-color: var(--item-hover);
+}
+
+/* Choix exclusif sur une ligne (taille, alignement, clair / sombre...) */
+.ui-segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--item-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+}
+
+.ui-segmented button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-second);
+  font-family: inherit;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.ui-segmented button:hover {
+  color: white;
+  background: var(--item-hover);
+}
+
+.ui-segmented button.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Focus clavier visible sur tous les contrôles communs */
+.ui-btn:focus-visible,
+.ui-icon-btn:focus-visible,
+.ui-icon-btn-ghost:focus-visible,
+.ui-segmented button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

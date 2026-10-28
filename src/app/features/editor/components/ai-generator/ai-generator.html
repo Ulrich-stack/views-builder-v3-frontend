@@ -1,6 +1,6 @@
 <div class="ai-generator">
     <section class="block">
-        <label class="field-label" for="ai-prompt">Décrivez la page à créer</label>
+        <label class="prompt-label" for="ai-prompt">Décrivez la page à créer</label>
         <textarea id="ai-prompt" rows="5"
             placeholder="Ex : page d'accueil pour une boulangerie bio, avec les horaires et une section commande"
             [value]="prompt()" (input)="prompt.set($any($event.target).value)" (keydown)="onKeydown($event)"
@@ -21,7 +21,7 @@
                     <span class="attachment-name">{{ img.name }}</span>
                     <span class="attachment-hint">La page reprendra sa structure, avec votre thème.</span>
                 </div>
-                <button class="icon-btn" (click)="removeImage()" [disabled]="loading()" title="Retirer la capture">
+                <button class="ui-icon-btn-ghost" (click)="removeImage()" [disabled]="loading()" title="Retirer la capture">
                     <lucide-angular name="x" class="small-icon"></lucide-angular>
                 </button>
             </div>
@@ -76,9 +76,9 @@
     <section class="block audit">
         <div class="block-title">
             <h4>Lisibilité</h4>
-            <button class="secondary-btn" (click)="runAudit()" [disabled]="loading()">Vérifier la page</button>
+            <button class="ui-btn" (click)="runAudit()" [disabled]="loading()">Vérifier la page</button>
         </div>
-        <p class="hint">Repère les textes trop peu contrastés sur leur fond (normes d'accessibilité WCAG).</p>
+        <p class="ui-hint">Repère les textes trop peu contrastés sur leur fond (normes d'accessibilité WCAG).</p>
 
         @if (issues(); as list) {
             @if (list.length === 0) {
@@ -100,7 +100,7 @@
                                 <span class="issue-ratio">{{ formatRatio(group.ratio) }}:1 · minimum {{ group.minimum === 3 ? '3' : '4,5' }}:1</span>
                             </button>
                             @if (canFix(group)) {
-                                <button class="secondary-btn" (click)="fixGroup(group)" [disabled]="!!fixingKey()"
+                                <button class="ui-btn" (click)="fixGroup(group)" [disabled]="!!fixingKey()"
                                     [title]="comesFromTheme(group) ? 'Ajuste les couleurs du thème : corrige tous ces textes d\'un coup' : 'Demande à l\'IA de corriger ces blocs'">
                                     {{ fixingKey() === groupKey(group) ? 'Correction…' : (comesFromTheme(group) ? 'Ajuster le thème' : 'Corriger') }}
                                 </button>

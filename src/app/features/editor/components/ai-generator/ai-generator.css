@@ -34,13 +34,7 @@
     color: var(--text-main);
 }
 
-.hint {
-    font-size: 0.74rem;
-    line-height: 1.45;
-    color: var(--text-second);
-}
-
-.field-label {
+.prompt-label {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-main);
@@ -243,48 +237,6 @@ textarea:disabled {
     color: var(--text-second);
 }
 
-.icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    color: var(--text-second);
-    cursor: pointer;
-}
-
-.icon-btn:hover:not(:disabled) {
-    color: var(--text-main);
-    background-color: var(--item-hover);
-}
-
-/* --- Audit --- */
-.secondary-btn {
-    flex-shrink: 0;
-    padding: 6px 10px;
-    background-color: var(--item-bg);
-    border: 1px solid var(--sidebar-border);
-    border-radius: 6px;
-    color: var(--text-main);
-    font-family: inherit;
-    font-size: 0.74rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s;
-}
-
-.secondary-btn:hover:not(:disabled) {
-    background-color: var(--item-hover);
-}
-
-.secondary-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .issues {
     list-style: none;
     display: flex;
@@ -357,4 +309,9 @@ textarea:disabled {
 .colors-toggle.disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* Mise en page locale des contrôles communs (src/styles/panel-ui.css) */
+.ui-btn {
+  flex-shrink: 0;
 }

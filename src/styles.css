@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+/* Contrôles communs aux panneaux de l'éditeur */
+@import './styles/panel-ui.css';
 
 body{
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -19,6 +21,8 @@ body{
     --text-main: #e0e0e0;
     --text-second: #999999;
     --accent: #3b82f6;
+    --danger: #ef4444;
+    --danger-text: #fca5a5;
 }
 
 /* Icônes Lucide : la taille se règle par une classe CSS (width/height) sur l'élément */
