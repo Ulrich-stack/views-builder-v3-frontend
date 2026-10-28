@@ -6,6 +6,7 @@ import { DS_PAGE_ID, EditorService } from '../../../../../core/services/EditorSe
 import { Widget } from '../../../../../core/models/widget.model';
 import { AiEditBox } from '../ai-edit-box/ai-edit-box';
 import { ICON_NAMES, ICONS } from '../../../../../core/data/icons.data';
+import { creditOf } from '../../../../../core/utils/photo-credits';
 import { ActionsEditor } from '../actions-editor/actions-editor';
 
 export interface Preset {
@@ -307,13 +308,26 @@ export class Properties {
     if (w) this.editor.updateWidget(w.id, { content: value }, 'content:' + w.id);
   }
 
+  /** Crédit de la photo du bloc sélectionné (image, ou photo de fond d'une section) */
+  credit = computed(() => {
+    const w = this.widget();
+    return w ? creditOf(w) : null;
+  });
+
   config(key: string): string {
     return this.widget()?.config[key] ?? '';
   }
 
   setConfig(key: string, value: any) {
     const w = this.widget();
-    if (w) this.editor.setWidgetConfig(w.id, key, value);
+    if (!w) return;
+    // Une autre photo n'est plus celle du photographe crédité : le crédit part avec l'ancienne, en une seule étape
+    if (key === 'src' && ('credit' in w.config || 'creditUrl' in w.config)) {
+      const { credit, creditUrl, ...rest } = w.config;
+      this.editor.updateWidget(w.id, { config: { ...rest, src: value } }, 'config:src:' + w.id);
+      return;
+    }
+    this.editor.setWidgetConfig(w.id, key, value);
   }
 
   useSampleImage() {

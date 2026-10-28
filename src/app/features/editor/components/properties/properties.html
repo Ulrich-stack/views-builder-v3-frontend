@@ -36,6 +36,19 @@
           </div>
         </div>
 
+        @if (credit(); as c) {
+          <p class="photo-credit">
+            <lucide-angular name="image" class="credit-icon"></lucide-angular>
+            <span>Photo :
+              @if (c.url) {
+                <a [href]="c.url" target="_blank" rel="noopener">{{ c.credit }}</a>
+              } @else {
+                {{ c.credit }}
+              }
+            </span>
+          </p>
+        }
+
         <div class="action-row">
           <button class="ui-icon-btn" (click)="moveBy(w, -1)" [disabled]="!canMoveBy(w, -1)" title="Monter">
             <lucide-angular name="arrow-up" class="icon"></lucide-angular>

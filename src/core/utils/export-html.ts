@@ -2,6 +2,7 @@ import { Page } from '../models/page.model';
 import { Widget } from '../models/widget.model';
 import { FONTS, fontName } from '../data/themes.data';
 import { iconSvg } from '../data/icons.data';
+import { photoCredits } from './photo-credits';
 import { actionsOf, INTERACTIONS_CSS, INTERACTIONS_RUNTIME, sanitizeActions } from './interactions';
 
 /** Échappe un texte pour l'insérer dans du HTML (contenu ou attribut). */
@@ -99,6 +100,8 @@ body { background: var(--bg-page); color: var(--text); font-family: var(--font-f
 .vb { position: relative; }
 .vb > h1, .vb > h2, .vb > h3, .vb > blockquote, .vb > p, .vb > span, .vb > a { margin: 0; font: inherit; color: inherit; text-decoration: none; display: block; }
 .vb-icon > svg { display: block; width: 100%; height: 100%; }
+.vb-credits { padding: 16px 6%; font-size: 12px; color: var(--text-muted); text-align: center; }
+.vb-credits a { color: inherit; text-underline-offset: 2px; }
 .vb-button { all: unset; display: block; width: 100%; text-align: center; white-space: nowrap; cursor: pointer; font: inherit; color: inherit; }
 .vb-button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .vb > img, .vb > video { display: block; width: 100%; height: 100%; max-width: 100%; object-fit: cover; }
@@ -106,6 +109,17 @@ body { background: var(--bg-page); color: var(--text); font-family: var(--font-f
 .vb-framed > .vb-field { background: transparent; border: none; border-radius: 0; padding: 0; resize: none; outline: none; }
 .vb-checkbox { display: inline-flex; align-items: center; gap: 8px; }
 ${INTERACTIONS_CSS}`;
+
+/** Crédits des photographes en bas de page (exigés par Unsplash), avec un lien vers chacun. */
+function creditsLine(widgets: Widget[]): string {
+  const credits = photoCredits(widgets);
+  if (!credits.length) return '';
+  const items = credits.map(c => c.url
+    ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.credit)}</a>`
+    : escapeHtml(c.credit));
+  return `<p class="vb-credits">Photos : ${items.join(', ')}</p>
+`;
+}
 
 /** Actions de la page, par bloc. Le JSON est rendu sûr à l'intérieur d'une balise <script>. */
 function actionsScript(widgets: Widget[]): string {
@@ -148,7 +162,7 @@ ${BASE_CSS}
 </head>
 <body>
 ${body}
-${actionsScript(page.widgets)}</body>
+${creditsLine(page.widgets)}${actionsScript(page.widgets)}</body>
 </html>
 `;
 }
