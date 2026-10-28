@@ -157,35 +157,6 @@ button.crumb:hover {
   gap: 6px;
 }
 
-.icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sidebar-bg);
-  border: 1px solid var(--sidebar-border);
-  color: var(--text-main);
-  border-radius: 6px;
-  padding: 7px 0;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.icon-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: var(--item-hover);
-}
-
-.icon-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
-.icon-btn.danger:hover {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-}
-
 /* --- Sections repliables --- */
 .group {
   background: color-mix(in srgb, var(--item-bg) 45%, transparent);
@@ -238,78 +209,10 @@ button.crumb:hover {
   padding: 2px 12px 14px;
 }
 
-.field-label {
-  font-size: 0.72rem;
-  color: var(--text-second);
-  margin-top: 6px;
-}
-
-.field {
-  width: 100%;
-  background-color: var(--item-bg);
-  border: 1px solid var(--sidebar-border);
-  border-radius: 6px;
-  padding: 0.55rem 0.7rem;
-  color: white;
-  font-family: inherit;
-  font-size: 0.82rem;
-  outline: none;
-  resize: vertical;
-  transition: border-color 0.2s;
-}
-
-.field:focus {
-  border-color: var(--accent);
-}
-
-.hint {
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: var(--text-second);
-}
-
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-}
-
-/* --- Boutons à choix --- */
-.segmented {
-  display: flex;
-  background: var(--item-bg);
-  border: 1px solid var(--sidebar-border);
-  border-radius: 8px;
-  padding: 2px;
-  gap: 2px;
-}
-
-.segmented button {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  color: var(--text-second);
-  font-family: inherit;
-  font-size: 0.72rem;
-  padding: 6px 2px;
-  border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-
-.segmented button:hover {
-  color: white;
-  background: var(--item-hover);
-}
-
-.segmented button.active {
-  background: var(--accent);
-  color: white;
 }
 
 .radius-dot {
@@ -456,24 +359,6 @@ button.crumb:hover {
   color: #86efac;
   background: var(--item-bg);
   border-radius: 4px;
-}
-
-/* --- Boutons secondaires --- */
-.secondary-btn {
-  margin-top: 4px;
-  background: var(--item-bg);
-  border: 1px solid var(--sidebar-border);
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 0.78rem;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.secondary-btn:hover {
-  border-color: var(--accent);
 }
 
 .reset-btn {
@@ -665,4 +550,9 @@ kbd {
 .icon-choice:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* Mise en page locale des contrôles communs (src/styles/panel-ui.css) */
+.ui-btn {
+  margin-top: 4px;
 }

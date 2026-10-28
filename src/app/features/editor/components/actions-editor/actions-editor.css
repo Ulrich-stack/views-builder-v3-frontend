@@ -4,38 +4,9 @@
   gap: 6px;
 }
 
-.field-label {
-  font-size: 0.72rem;
-  color: var(--text-second);
-  margin-top: 6px;
-}
-
-.hint {
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: var(--text-second);
-}
-
 .warning {
   font-size: 0.7rem;
   color: #fbbf24;
-}
-
-.field {
-  width: 100%;
-  min-width: 0;
-  background-color: var(--item-bg);
-  border: 1px solid var(--sidebar-border);
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  color: white;
-  font-family: inherit;
-  font-size: 0.78rem;
-  outline: none;
-}
-
-.field:focus {
-  border-color: var(--accent);
 }
 
 .check {
